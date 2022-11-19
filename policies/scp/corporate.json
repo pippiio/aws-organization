@@ -1,0 +1,196 @@
+{
+"Version": "2012-10-17",
+"Statement": [
+{
+  "Sid": "DenyLeavingOrganization",
+  "Effect": "Deny",
+  "Action": [
+    "organizations:LeaveOrganization", 
+    "organizations:DeleteOrganization" 
+  ],
+  "Resource": "*"
+},
+{
+  "Sid": "BlockRootUser",
+  "Effect": "Deny",
+  "Action": "*",
+  "Resource": "*",
+  "Condition": {
+    "ArnLike": {
+      "aws:PrincipalArn": "arn:aws:iam::*:root"
+    }
+  }
+},
+{
+  "Sid": "DenyDisabledRegions",
+  "Effect": "Deny",
+  "NotAction": [
+    "a4b:*",
+    "acm:*",
+    "aws-marketplace-management:*",
+    "aws-marketplace:*",
+    "aws-portal:*",
+    "budgets:*",
+    "ce:*",
+    "chime:*",
+    "cloudfront:*",
+    "config:*",
+    "cur:*",
+    "directconnect:*",
+    "ec2:DescribeRegions",
+    "ec2:DescribeTransitGateways",
+    "ec2:DescribeVpnGateways",
+    "fms:*",
+    "globalaccelerator:*",
+    "health:*",
+    "iam:*",
+    "importexport:*",
+    "kms:*",
+    "mobileanalytics:*",
+    "networkmanager:*",
+    "organizations:*",
+    "pricing:*",
+    "route53:*",
+    "route53domains:*",
+    "s3:GetAccountPublic*",
+    "s3:ListAllMyBuckets",
+    "s3:PutAccountPublic*",
+    "shield:*",
+    "sts:*",
+    "support:*",
+    "trustedadvisor:*",
+    "waf-regional:*",
+    "waf:*",
+    "wafv2:*",
+    "wellarchitected:*"
+  ],
+  "Resource": "*",
+  "Condition": {
+    "StringNotEquals": {
+      "aws:RequestedRegion": [
+        ${enabled_regions}
+      ]
+    },
+    "ArnNotLike": {
+      "aws:PrincipalARN": [
+        "arn:aws:iam::*:role/${organization_role_name}",
+        "arn:aws:iam::*:role/${super_admin_role}"
+      ]
+    }
+  }
+},
+{
+  "Sid": "DenyPublicS3Buckets",
+  "Effect": "Deny",
+  "Action": [
+    "s3:PutAccountPublicAccessBlock" 
+  ],
+  "Resource": [
+    "*"
+  ],
+  "Condition": {
+    "ArnNotLike": {
+      "aws:PrincipalARN": [
+        "arn:aws:iam::*:role/${organization_role_name}",
+        "arn:aws:iam::*:role/${super_admin_role}"
+      ]
+    }
+  }
+},
+{
+  "Sid": "DenyDisablingCloudtrailConfigAndGuardduty",
+  "Effect": "Deny",
+  "Action": [
+    "cloudtrail:DeleteTrail", 
+    "cloudtrail:PutEventSelectors", 
+    "cloudtrail:StopLogging", 
+    "cloudtrail:UpdateTrail" ,
+
+    "config:DeleteConfigRule",
+    "config:DeleteConfigurationRecorder",
+    "config:DeleteDeliveryChannel",
+    "config:StopConfigurationRecorder",
+
+    "guardduty:AcceptInvitation",
+    "guardduty:ArchiveFindings",
+    "guardduty:CreateDetector",
+    "guardduty:CreateFilter",
+    "guardduty:CreateIPSet",
+    "guardduty:CreateMembers",
+    "guardduty:CreatePublishingDestination",
+    "guardduty:CreateSampleFindings",
+    "guardduty:CreateThreatIntelSet",
+    "guardduty:DeclineInvitations",
+    "guardduty:DeleteDetector",
+    "guardduty:DeleteFilter",
+    "guardduty:DeleteInvitations",
+    "guardduty:DeleteIPSet",
+    "guardduty:DeleteMembers",
+    "guardduty:DeletePublishingDestination",
+    "guardduty:DeleteThreatIntelSet",
+    "guardduty:DisassociateFromMasterAccount",
+    "guardduty:DisassociateMembers",
+    "guardduty:InviteMembers",
+    "guardduty:StartMonitoringMembers",
+    "guardduty:StopMonitoringMembers",
+    "guardduty:TagResource",
+    "guardduty:UnarchiveFindings",
+    "guardduty:UntagResource",
+    "guardduty:UpdateDetector",
+    "guardduty:UpdateFilter",
+    "guardduty:UpdateFindingsFeedback",
+    "guardduty:UpdateIPSet",
+    "guardduty:UpdatePublishingDestination",
+    "guardduty:UpdateThreatIntelSet"
+  ],      
+  "Resource": "*"
+},
+{
+  "Sid": "DenyCreatingAndManagingUsers",
+  "Effect": "Deny",
+  "Action": [
+    "iam:AddUserToGroup",
+    "iam:AttachUserPolicy",
+    "iam:CreateAccessKey",
+    "iam:CreateLoginProfile",
+    "iam:CreateUser",
+    "iam:DeleteUserPermissionsBoundary",
+    "iam:DeleteUserPolicy",
+    "iam:PutUserPermissionsBoundary",
+    "iam:SetDefaultPolicyVersion",
+    "iam:UpdateLoginProfile"
+  ],
+  "Resource": "*",
+  "Condition": {
+    "ArnNotLike": {
+      "aws:PrincipalARN": [
+        "arn:aws:iam::*:role/${organization_role_name}",
+        "arn:aws:iam::*:role/${super_admin_role}"
+      ]
+    }
+  }
+},
+{
+  "Sid": "DenyOrganisationRoleChanges",
+  "Effect": "Deny",
+  "Action": [
+    "iam:AttachRolePolicy",
+    "iam:DeleteRole",
+    "iam:DeleteRolePermissionsBoundary",
+    "iam:DeleteRolePolicy",
+    "iam:DetachRolePolicy",
+    "iam:PassRole",
+    "iam:PutRolePermissionsBoundary",
+    "iam:PutRolePolicy",
+    "iam:UpdateAssumeRolePolicy",
+    "iam:UpdateRole",
+    "iam:UpdateRoleDescription",
+    "sts:AssumeRole"
+  ],
+  "Resource": [
+    "arn:aws:iam::*:role/${organization_role_name}",
+    "arn:aws:iam::*:role/${super_admin_role}"
+  ]
+}
+]
+}

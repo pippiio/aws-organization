@@ -1,0 +1,114 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "DenyDisablingCloudtrail",
+      "Effect": "Deny",
+      "Action": [
+        "cloudtrail:DeleteTrail", 
+        "cloudtrail:PutEventSelectors", 
+        "cloudtrail:StopLogging", 
+        "cloudtrail:UpdateTrail" 
+      ],
+      "Resource": ["*"]
+    },
+    {
+      "Sid": "DenyDisablingAwsConfig",
+      "Effect": "Deny",
+      "Action": [
+        "config:DeleteConfigurationAggregator", 
+        "config:DeleteConfigurationRecorder", 
+        "config:DeleteDeliveryChannel", 
+        "config:DeleteRetentionConfiguration", 
+        "config:PutConfigurationAggregator", 
+        "config:PutConfigurationRecorder", 
+        "config:PutDeliveryChannel", 
+        "config:PutRetentionConfiguration", 
+        "config:StopConfigurationRecorder" 
+      ],
+      "Resource": ["*"],
+      "Condition": {
+        "ArnNotLike": {
+          "aws:PrincipalARN": [
+            "arn:aws:iam::*:role/${organization_role_name}",
+            "arn:aws:iam::*:role/${super_admin_role}"
+          ]
+        }
+      }
+    },
+    {
+      "Sid": "DenyDisablingGuardDuty",
+      "Effect": "Deny",
+      "Action": [
+        "guardduty:DeclineInvitations", 
+        "guardduty:Disassociate*", 
+        "guardduty:DeleteDetector", 
+        "guardduty:DeleteInvitations", 
+        "guardduty:DeleteIPSet", 
+        "guardduty:DeleteMembers", 
+        "guardduty:DeleteThreatIntelSet", 
+        "guardduty:StopMonitoringMembers", 
+        "guardduty:UpdateDetector" 
+      ],
+      "Resource": ["*"],
+      "Condition": {
+        "ArnNotLike": {
+          "aws:PrincipalARN": [
+            "arn:aws:iam::*:role/${organization_role_name}",
+            "arn:aws:iam::*:role/${super_admin_role}"
+          ]
+        }
+      }
+    },
+    {
+      "Sid": "DenyOrganisationRoleChanges",
+      "Effect": "Deny",
+      "Action": [
+        "iam:AttachRolePolicy", 
+        "iam:CreateRole", 
+        "iam:DeleteRole", 
+        "iam:DeleteRolePermissionsBoundary", 
+        "iam:DeleteRolePolicy", 
+        "iam:DetachRolePolicy", 
+        "iam:PutRolePermissionsBoundary", 
+        "iam:PutRolePolicy", 
+        "iam:UpdateAssumeRolePolicy",
+        "iam:UpdateRole", 
+        "iam:UpdateRoleDescription" 
+      ],
+      "Resource": ["arn:aws:iam::*:role/OrganizationAccountAccessRole"]
+    },
+    {
+      "Sid": "DenyCreateConsoleLogin",
+      "Effect": "Deny",
+      "Action": [
+        "iam:CreateLoginProfile",
+        "organizations:LeaveOrganization", 
+        "organizations:DeleteOrganization" 
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "PreventSharingResourcesOutsideOrganization",
+      "Effect": "Deny",
+      "Action": ["*"],
+      "Resource": ["*"],
+      "Condition": {
+        "Bool": {
+          "ram:AllowsExternalPrincipals": "true"
+        }
+      }
+    },
+    {
+      "Sid": "BlockRootUser",
+      "Effect": "Deny",
+      "Action": ["*"],
+      "Resource": ["*"],
+      "Condition": {
+        "ArnLike": {
+          "aws:PrincipalArn": "arn:aws:iam::*:root"
+        }
+      }
+    }
+  ]
+}

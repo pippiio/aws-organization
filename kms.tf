@@ -6,17 +6,35 @@ data "aws_iam_policy_document" "kms" {
 
     principals {
       type        = "AWS"
-      identifiers = ["arn:aws:iam::${local.master_account_id}:root"]
+      identifiers = ["arn:aws:iam::${local.account_id}:root"]
     }
   }
+  statement {
+    sid       = "Allow Cloudtrail CloudWatch Logs"
+    resources = ["*"]
+    actions = [
+      "kms:Encrypt",
+      "kms:Decrypt",
+      "kms:ReEncrypt*",
+      "kms:GenerateDataKey*",
+      "kms:DescribeKey"
+    ]
 
+    principals {
+      type        = "Service"
+      identifiers = ["logs.amazonaws.com"]
+    }
+
+    condition {
+      test     = "ArnEquals"
+      variable = "kms:EncryptionContext:aws:logs:arn"
+      values   = ["arn:aws:logs:*:${local.account_id}:log-group:${local.name_prefix}cloudtrail-logs"]
+    }
+  }
   statement {
     sid       = "Allow CloudTrail to encrypt logs"
-    effect    = "Allow"
-    resources = ["arn:aws:kms:${data.aws_region.current.name}:${local.master_account_id}:key/*"]
-    actions = [
-      "kms:GenerateDataKey*",
-    ]
+    resources = ["*"]
+    actions   = ["kms:GenerateDataKey*"]
 
     principals {
       type        = "Service"
@@ -24,20 +42,21 @@ data "aws_iam_policy_document" "kms" {
     }
 
     condition {
+      test     = "StringLike"
+      variable = "kms:EncryptionContext:aws:cloudtrail:arn"
+      values   = [for account in data.aws_organizations_organization.this.accounts : "arn:aws:cloudtrail:*:${account.id}:trail/*"]
+    }
+
+    condition {
       test     = "StringEquals"
       variable = "aws:SourceArn"
-
-      values = ["arn:aws:cloudtrail:${data.aws_region.current.name}:${local.master_account_id}:trail/${local.cloudtrail_name}"]
+      values   = ["arn:aws:cloudtrail:${local.region_name}:${local.account_id}:trail/${local.name_prefix}organization-cloudtrail"]
     }
   }
-
   statement {
     sid       = "Allow CloudTrail access"
-    effect    = "Allow"
-    resources = ["arn:aws:kms:${data.aws_region.current.name}:${local.master_account_id}:key/*"]
-    actions = [
-      "kms:DescribeKey",
-    ]
+    resources = ["*"]
+    actions   = ["kms:DescribeKey"]
 
     principals {
       type        = "Service"
@@ -47,47 +66,52 @@ data "aws_iam_policy_document" "kms" {
     condition {
       test     = "StringEquals"
       variable = "aws:SourceArn"
-
-      values = ["arn:aws:cloudtrail:${data.aws_region.current.name}:${local.master_account_id}:trail/${local.cloudtrail_name}"]
+      values   = ["arn:aws:cloudtrail:${local.region_name}:${local.account_id}:trail/${local.name_prefix}organization-cloudtrail"]
     }
   }
-
   statement {
-    sid       = "Enable CloudTrail log decrypt permissions"
-    effect    = "Allow"
-    resources = ["arn:aws:s3:::${local.cloudtrail_s3_name}"]
+    sid       = "Allow CloudTrail to decrypt a trail"
+    resources = ["*"]
+    actions   = ["kms:Decrypt"]
+
+    principals {
+      type        = "Service"
+      identifiers = ["cloudtrail.amazonaws.com"]
+    }
+  }
+  statement {
+    sid       = "Allow Backup"
+    resources = ["*"]
     actions = [
+      "kms:Encrypt",
       "kms:Decrypt",
+      "kms:ReEncrypt*",
+      "kms:GenerateDataKey*",
+      "kms:DescribeKey"
     ]
 
     principals {
-      type        = "AWS"
-      identifiers = [for a in aws_organizations_account.accounts : "arn:aws:iam::${a.id}:root"]
+      type        = "Service"
+      identifiers = ["backup.amazonaws.com"]
     }
 
-    condition {
-      test     = "StringEquals"
-      variable = "aws:PrincipalOrgID"
-
-      values = [data.aws_organizations_organization.organization.id]
-    }
-
-    condition {
-      test     = "Null"
-      variable = "kms:EncryptionContext:aws:cloudtrail:arn"
-
-      values = ["false"]
-    }
+    #   condition {
+    #     test     = "ArnEquals"
+    #     variable = "kms:EncryptionContext:aws:logs:arn"
+    #     values   = ["arn:aws:logs:*:${local.account_id}:log-group:${local.name_prefix}cloudtrail-logs"]
+    #   }
   }
+  # ${data.aws_caller_identity.backup.id}
 }
 
-resource "aws_kms_key" "cloudtrail" {
-  description         = "KMS CMK used by organization cloudtrail."
+resource "aws_kms_key" "this" {
+  description         = "KMS CMK used for audit log"
   enable_key_rotation = true
   policy              = data.aws_iam_policy_document.kms.json
+  tags                = local.default_tags
 }
 
-resource "aws_kms_alias" "cloudtrail" {
-  name          = "alias/organization-cloudtrail-kms-cmk"
-  target_key_id = aws_kms_key.cloudtrail.key_id
+resource "aws_kms_alias" "this" {
+  name          = "alias/auditlog"
+  target_key_id = aws_kms_key.this.key_id
 }

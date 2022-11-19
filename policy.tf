@@ -1,13 +1,27 @@
-resource "aws_organizations_policy" "this" {
-  for_each = local.config.policies != null ? local.config.policies : {}
 
-  name    = each.key
-  content = each.value.content
-}
 
-resource "aws_organizations_policy_attachment" "this" {
-  for_each = local.targets_map
+# resource "aws_organizations_policy" "scp" {
+#   for_each = fileset(path.module, "/policies/scp/*.json")
 
-  policy_id = aws_organizations_policy.this[each.value.policy_name].id
-  target_id = each.value.target_type == "ROOT" ? data.aws_organizations_organization.organization.roots[0].id : each.value.target_type == "UNIT" ? aws_organizations_organizational_unit.units[each.value.target].id : aws_organizations_account.accounts[each.value.target].id
-}
+#   name    = title(replace(split(".", basename(each.key))[0], "/[-_]+/", " "))
+#   type    = "SERVICE_CONTROL_POLICY"
+#   content = file("${path.module}/${each.value}")
+#   tags    = local.default_tags
+# }
+
+# resource "aws_organizations_policy" "tag" {
+#   for_each = fileset(path.module, "/policies/tag/*.json")
+
+#   name    = title(replace(split(".", basename(each.key))[0], "/[-_]+/", " "))
+#   type    = "TAG_POLICY"
+#   content = file("${path.module}/${each.value}")
+#   tags    = local.default_tags
+# }
+
+# resource "aws_organizations_policy_attachment" "aws" {
+#   # aws managed base policy is deployed on all units to avoid MIN_POLICY_TYPE_ATTACHMENT_LIMIT_EXCEEDED issue
+#   for_each = local.aws_organizations_organizational_unit
+
+#   policy_id = "p-FullAWSAccess"
+#   target_id = each.value.id
+# }

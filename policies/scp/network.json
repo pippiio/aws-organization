@@ -1,0 +1,47 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "DenyNonNetworkRelatedActions",
+      "Effect": "Deny",
+      "NotAction": [
+        "cloudfront:*",
+        "ec2:*",
+        "fms:*:",
+        "iam:*",
+        "network-firewall:*",
+        "organizations:*",
+        "route53:*",
+        "route53resolver:*",
+        "route53domains:*",
+        "shield:*",
+        "vpc:*",
+        "waf:*",
+        "waf-regional:*",
+        "wafv2:*"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "DenyRemovingDomainsAndHostedzone",
+      "Effect": "Deny",
+      "Action": [
+        "route53:DeleteHostedZone",
+        "route53domains:DeleteDomain",
+        "route53domains:DisableDomain*",
+        "route53domains:TransferDomain*",
+        "route53domains:UpdateDomainContact*",
+        "route53domains:RetrieveDomainAuthCode"
+      ],
+      "Resource": "*",
+      "Condition": {
+        "ArnNotLike": {
+          "aws:PrincipalARN": [
+            "arn:aws:iam::*:role/${organization_role_name}",
+            "arn:aws:iam::*:role/${super_admin_role}"
+          ]
+        }
+      }
+    }
+  ]
+}
