@@ -46,6 +46,18 @@ variable "config" {
       # backup = optional(map(object({})))
     }), {})
 
+    sso = optional(object({
+      groups = map(object({
+        description = string
+      }))
+
+      users = optional(map(object({
+        full_name = string
+        email     = string
+        groups    = set(string)
+      })), {})
+    }))
+
     backup = object({
       disabled = optional(bool, false)
 
