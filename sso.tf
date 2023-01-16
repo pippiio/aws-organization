@@ -148,82 +148,21 @@ resource "aws_ssoadmin_managed_policy_attachment" "read_only" {
   permission_set_arn = one(aws_ssoadmin_permission_set.read_only).arn
 }
 
-resource "aws_ssoadmin_account_assignment" "unit" {
-  for_each = { for entry in toset(flatten([
-    for unit_name, unit in var.config.units : [
-      for group, permissions in unit.sso : [
-        for account_name, account in unit.accounts : [
-          for permission in permissions : {
-            key        = "${unit_name}/${account_name}/${group}/${permission}"
-            account    = "${unit_name}/${account_name}"
-            group      = group
-            permission = permission
-  }]]]])) : entry.key => entry }
+resource "aws_ssoadmin_account_assignment" "this" {
+  for_each = { for entry in flatten([
+    for name, account in local.accounts : [
+      for group, permissions in account.all_sso : [
+        for permission in permissions : {
+          key        = "${name}:${group}:${permission}"
+          account    = name
+          group      = group
+          permission = permission
+  }]]]) : entry.key => entry }
 
   instance_arn       = one(one(data.aws_ssoadmin_instances.this).arns)
   permission_set_arn = local.permission_sets[each.value.permission]
-  principal_type     = "GROUP"
   principal_id       = aws_identitystore_group.this[each.value.group].group_id
-  target_type        = "AWS_ACCOUNT"
-  target_id          = aws_organizations_account.unit[each.value.account].id
-}
-
-# resource "aws_ssoadmin_account_assignment" "unit_account" {
-#   for_each = { for entry in toset(flatten([
-#     for unit_name, unit in var.config.units : [
-#       for account_name, account in unit.accounts : [
-#         for group, permissions in account.sso : [
-#           for permission in permissions : {
-#             key        = "${unit_name}/${account_name}/${group}/${permission}"
-#             account    = "${unit_name}/${account_name}"
-#             group      = group
-#             permission = permission
-#   }]]]])) : entry.key => entry }
-
-#   instance_arn       = one(one(data.aws_ssoadmin_instances.this).arns)
-#   permission_set_arn = local.permission_sets[each.value.permission]
-#   principal_id       = data.aws_identitystore_group.this[each.value.group].id
-#   principal_type     = "GROUP"
-#   target_id          = aws_organizations_account.unit[each.value.account].id
-# }
-
-resource "aws_ssoadmin_account_assignment" "child" {
-  for_each = { for entry in toset(flatten([
-    for unit_name, unit in var.config.units : [
-      for child_name, child in unit.children : [
-        for account_name, account in child.accounts : [
-          for group, permissions in child.sso : [
-            for permission in permissions : {
-              key        = "${unit_name}/${child_name}/${account_name}/${group}/${permission}"
-              account    = "${unit_name}/${child_name}/${account_name}"
-              group      = group
-              permission = permission
-  }]]]]])) : entry.key => entry }
-
-  instance_arn       = one(one(data.aws_ssoadmin_instances.this).arns)
-  permission_set_arn = local.permission_sets[each.value.permission]
   principal_type     = "GROUP"
-  principal_id       = aws_identitystore_group.this[each.value.group].group_id
+  target_id          = aws_organizations_account.this[each.value.account].id
   target_type        = "AWS_ACCOUNT"
-  target_id          = aws_organizations_account.child[each.value.account].id
 }
-
-# resource "aws_ssoadmin_account_assignment" "child_account" {
-#   for_each = { for entry in toset(flatten([
-#     for unit_name, unit in var.config.units : [
-#       for child_name, child in unit.children : [
-#         for account_name, account in child.accounts : [
-#           for group, permissions in account.sso : [
-#             for permission in permissions : {
-#               key        = "${unit_name}/${child_name}/${group}/${permission}"
-#               account    = "${unit_name}/${account_name}"
-#               group      = group
-#               permission = permission
-#   }]]]]])) : entry.key => entry }
-
-#   instance_arn       = one(one(data.aws_ssoadmin_instances.this).arns)
-#   permission_set_arn = local.permission_sets[each.value.permission]
-#   principal_id       = data.aws_identitystore_group.this[each.value.group].id
-#   principal_type     = "GROUP"
-#   target_id          = aws_organizations_account.child[each.value.account].id
-# }
