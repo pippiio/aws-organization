@@ -16,7 +16,7 @@ locals {
       children = try(var.config.units["security"].children, {})
       sso      = try(var.config.units["security"].sso, {})
       scp = setunion(try(var.config.units["security"].scp, []), [
-        "security",
+        # "security",
       ])
       approved_services = []
       accounts = merge(try(var.config.units["security"].accounts, {}), {
@@ -42,7 +42,7 @@ locals {
       approved_services = []
       accounts = merge(try(var.config.units["infrastructure"].accounts, {}), {
         "Backup" = {
-          email = try(var.config.units["infrastructure"].accounts["Backup"].email, format(local.email_template, "log_archive"))
+          email = try(var.config.units["infrastructure"].accounts["Backup"].email, format(local.email_template, "backup"))
           tags  = local.default_tags
           scp   = []
           sso   = {}
