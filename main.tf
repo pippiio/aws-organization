@@ -16,21 +16,23 @@ locals {
       children = try(var.config.units["security"].children, {})
       sso      = try(var.config.units["security"].sso, {})
       scp = setunion(try(var.config.units["security"].scp, []), [
-        # "security",
+        "security",
       ])
       approved_services = []
       accounts = merge(try(var.config.units["security"].accounts, {}), {
         "Log archive" = {
-          email = try(var.config.units["security"].accounts["Log archive"].email, format(local.email_template, "log_archive"))
-          tags  = local.default_tags
-          scp   = []
-          sso   = {}
+          email           = try(var.config.units["security"].accounts["Log archive"].email, format(local.email_template, "log_archive"))
+          tags            = local.default_tags
+          scp             = []
+          sso             = {}
+          create_iam_user = false
         }
         "Security tooling" = {
-          email = try(var.config.units["security"].accounts["Security tooling"].email, format(local.email_template, "security_tooling"))
-          tags  = local.default_tags
-          scp   = []
-          sso   = {}
+          email           = try(var.config.units["security"].accounts["Security tooling"].email, format(local.email_template, "security_tooling"))
+          tags            = local.default_tags
+          scp             = []
+          sso             = {}
+          create_iam_user = false
         }
       })
     })
@@ -42,16 +44,18 @@ locals {
       approved_services = []
       accounts = merge(try(var.config.units["infrastructure"].accounts, {}), {
         "Backup" = {
-          email = try(var.config.units["infrastructure"].accounts["Backup"].email, format(local.email_template, "backup"))
-          tags  = local.default_tags
-          scp   = []
-          sso   = {}
+          email           = try(var.config.units["infrastructure"].accounts["Backup"].email, format(local.email_template, "backup"))
+          tags            = local.default_tags
+          scp             = []
+          sso             = {}
+          create_iam_user = false
         }
         "Network" = {
-          email = try(var.config.units["infrastructure"].accounts["Network"].email, format(local.email_template, "network"))
-          tags  = local.default_tags
-          scp   = []
-          sso   = {}
+          email           = try(var.config.units["infrastructure"].accounts["Network"].email, format(local.email_template, "network"))
+          tags            = local.default_tags
+          scp             = []
+          sso             = {}
+          create_iam_user = false
         }
       })
     })

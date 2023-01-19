@@ -18,3 +18,36 @@ resource "aws_organizations_account" "this" {
     ignore_changes = [role_name]
   }
 }
+
+resource "aws_iam_user" "iam_service_user" {
+  for_each = { for key, account in local.accounts : key => account if account.create_iam_user }
+
+  name = tostring(aws_organizations_account.this[each.key].id)
+  path = "/accounts/"
+
+  tags = local.default_tags
+}
+
+resource "aws_iam_access_key" "iam_service_user" {
+  for_each = { for key, account in local.accounts : key => account if account.create_iam_user }
+
+  user = aws_iam_user.iam_service_user[each.key].name
+}
+
+resource "aws_iam_user_policy" "iam_service_user" {
+  for_each = { for key, account in local.accounts : key => account if account.create_iam_user }
+
+  name   = "AssumeRole"
+  user   = aws_iam_user.iam_service_user[each.key].name
+  policy = data.aws_iam_policy_document.iam_service_user[each.key].json
+}
+
+data "aws_iam_policy_document" "iam_service_user" {
+  for_each = { for key, account in local.accounts : key => account if account.create_iam_user }
+
+  statement {
+    sid       = "AllowAssumeRole"
+    actions   = ["sts:AssumeRole"]
+    resources = ["arn:aws:iam::${aws_iam_user.iam_service_user[each.key].name}:role/${local.organization_role_name}"]
+  }
+}

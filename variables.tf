@@ -9,10 +9,11 @@ variable "config" {
       scp               = optional(set(string), [])      // scp names
       sso               = optional(map(set(string)), {}) // key = group, value = permission_set
       accounts = optional(map(object({                   // key = name
-        email = string
-        tags  = optional(map(string), {})
-        scp   = optional(set(string), [])      // scp names
-        sso   = optional(map(set(string)), {}) // key = group, value = permission_set
+        email           = string
+        tags            = optional(map(string), {})
+        scp             = optional(set(string), [])      // scp names
+        sso             = optional(map(set(string)), {}) // key = group, value = permission_set
+        create_iam_user = optional(bool, false)
       })), {})
 
       children = optional(map(object({ // key = name
@@ -20,10 +21,11 @@ variable "config" {
         scp  = optional(set(string), [])      // scp names
         sso  = optional(map(set(string)), {}) // key = group, value = permission_set
         accounts = optional(map(object({      // key = name
-          email = string
-          tags  = optional(map(string), {})
-          scp   = optional(set(string), [])      // scp names
-          sso   = optional(map(set(string)), {}) // key = group, value = permission_set
+          email           = string
+          tags            = optional(map(string), {})
+          scp             = optional(set(string), [])      // scp names
+          sso             = optional(map(set(string)), {}) // key = group, value = permission_set
+          create_iam_user = optional(bool, false)
         })), {})
       })), {})
       })), {
