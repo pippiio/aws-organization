@@ -2,11 +2,11 @@ resource "aws_organizations_policy" "corporate" {
   name        = "Corporate"
   type        = "SERVICE_CONTROL_POLICY"
   description = "Organization wide policy that protects the organization, limits regions, denies disabling security services, creating users and public s3 buckets."
-  content = templatefile("${path.module}/policies/scp/corporate.json", {
+  content = replace(templatefile("${path.module}/policies/scp/corporate.json", {
     organization_role_name = local.organization_role_name
     super_admin_role       = local.super_admin_role
     enabled_regions        = join(",", [for region in local.enabled_regions : "\"${region}\""])
-  })
+  }), "/\\s+/", " ")
   tags = local.default_tags
 }
 
@@ -21,14 +21,14 @@ resource "aws_organizations_policy" "suspended" {
   name        = "Suspended"
   description = "Denies everything."
   type        = "SERVICE_CONTROL_POLICY"
-  content     = file("${path.module}/policies/scp/suspended.json")
+  content     = replace(file("${path.module}/policies/scp/suspended.json"), "/\\s+/", " ")
   tags        = local.default_tags
 }
 
 resource "aws_organizations_policy" "security" {
   name    = "Security"
   type    = "SERVICE_CONTROL_POLICY"
-  content = file("${path.module}/policies/scp/security.json")
+  content = replace(file("${path.module}/policies/scp/security.json"), "/\\s+/", " ")
   tags    = local.default_tags
 }
 
@@ -37,11 +37,11 @@ resource "aws_organizations_policy" "approved_only" {
 
   name = replace(title(replace("approved ${each.key}", "_", " ")), " ", "")
   type = "SERVICE_CONTROL_POLICY"
-  content = templatefile("${path.module}/policies/scp/approved-only.json", {
+  content = replace(templatefile("${path.module}/policies/scp/approved-only.json", {
     organization_role_name = local.organization_role_name
     super_admin_role       = local.super_admin_role
     approved_services      = join(",", [for service in each.value.approved_services : "\"${service}:*\""])
-  })
+  }), "/\\s+/", " ")
   tags = merge(
     local.default_tags,
     each.value.tags

@@ -7,9 +7,7 @@
         "logs:DeleteLogGroup",
         "logs:DeleteLogStream"
       ],
-      "Resource": [
-        "arn:aws:logs:*"
-      ]
+      "Resource": "arn:aws:logs:*"
     }
   ]
 }

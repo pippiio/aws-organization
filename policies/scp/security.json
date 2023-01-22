@@ -5,28 +5,28 @@
       "Sid": "DenyDisablingCloudtrail",
       "Effect": "Deny",
       "Action": [
-        "cloudtrail:DeleteTrail", 
-        "cloudtrail:PutEventSelectors", 
-        "cloudtrail:StopLogging", 
-        "cloudtrail:UpdateTrail" 
+        "cloudtrail:DeleteTrail",
+        "cloudtrail:PutEventSelectors",
+        "cloudtrail:StopLogging",
+        "cloudtrail:UpdateTrail"
       ],
-      "Resource": ["*"]
+      "Resource": "*"
     },
     {
       "Sid": "DenyDisablingAwsConfig",
       "Effect": "Deny",
       "Action": [
-        "config:DeleteConfigurationAggregator", 
-        "config:DeleteConfigurationRecorder", 
-        "config:DeleteDeliveryChannel", 
-        "config:DeleteRetentionConfiguration", 
-        "config:PutConfigurationAggregator", 
-        "config:PutConfigurationRecorder", 
-        "config:PutDeliveryChannel", 
-        "config:PutRetentionConfiguration", 
-        "config:StopConfigurationRecorder" 
+        "config:DeleteConfigurationAggregator",
+        "config:DeleteConfigurationRecorder",
+        "config:DeleteDeliveryChannel",
+        "config:DeleteRetentionConfiguration",
+        "config:PutConfigurationAggregator",
+        "config:PutConfigurationRecorder",
+        "config:PutDeliveryChannel",
+        "config:PutRetentionConfiguration",
+        "config:StopConfigurationRecorder"
       ],
-      "Resource": ["*"],
+      "Resource": "*",
       "Condition": {
         "ArnNotLike": {
           "aws:PrincipalARN": [
@@ -40,17 +40,17 @@
       "Sid": "DenyDisablingGuardDuty",
       "Effect": "Deny",
       "Action": [
-        "guardduty:DeclineInvitations", 
-        "guardduty:Disassociate*", 
-        "guardduty:DeleteDetector", 
-        "guardduty:DeleteInvitations", 
-        "guardduty:DeleteIPSet", 
-        "guardduty:DeleteMembers", 
-        "guardduty:DeleteThreatIntelSet", 
-        "guardduty:StopMonitoringMembers", 
-        "guardduty:UpdateDetector" 
+        "guardduty:DeclineInvitations",
+        "guardduty:Disassociate*",
+        "guardduty:DeleteDetector",
+        "guardduty:DeleteInvitations",
+        "guardduty:DeleteIPSet",
+        "guardduty:DeleteMembers",
+        "guardduty:DeleteThreatIntelSet",
+        "guardduty:StopMonitoringMembers",
+        "guardduty:UpdateDetector"
       ],
-      "Resource": ["*"],
+      "Resource": "*",
       "Condition": {
         "ArnNotLike": {
           "aws:PrincipalARN": [
@@ -64,35 +64,35 @@
       "Sid": "DenyOrganisationRoleChanges",
       "Effect": "Deny",
       "Action": [
-        "iam:AttachRolePolicy", 
-        "iam:CreateRole", 
-        "iam:DeleteRole", 
-        "iam:DeleteRolePermissionsBoundary", 
-        "iam:DeleteRolePolicy", 
-        "iam:DetachRolePolicy", 
-        "iam:PutRolePermissionsBoundary", 
-        "iam:PutRolePolicy", 
+        "iam:AttachRolePolicy",
+        "iam:CreateRole",
+        "iam:DeleteRole",
+        "iam:DeleteRolePermissionsBoundary",
+        "iam:DeleteRolePolicy",
+        "iam:DetachRolePolicy",
+        "iam:PutRolePermissionsBoundary",
+        "iam:PutRolePolicy",
         "iam:UpdateAssumeRolePolicy",
-        "iam:UpdateRole", 
-        "iam:UpdateRoleDescription" 
+        "iam:UpdateRole",
+        "iam:UpdateRoleDescription"
       ],
-      "Resource": ["arn:aws:iam::*:role/OrganizationAccountAccessRole"]
+      "Resource": "arn:aws:iam::*:role/OrganizationAccountAccessRole"
     },
     {
       "Sid": "DenyCreateConsoleLogin",
       "Effect": "Deny",
       "Action": [
         "iam:CreateLoginProfile",
-        "organizations:LeaveOrganization", 
-        "organizations:DeleteOrganization" 
+        "organizations:LeaveOrganization",
+        "organizations:DeleteOrganization"
       ],
       "Resource": "*"
     },
     {
       "Sid": "PreventSharingResourcesOutsideOrganization",
       "Effect": "Deny",
-      "Action": ["*"],
-      "Resource": ["*"],
+      "Action": "*",
+      "Resource": "*",
       "Condition": {
         "Bool": {
           "ram:AllowsExternalPrincipals": "true"
@@ -102,8 +102,8 @@
     {
       "Sid": "BlockRootUser",
       "Effect": "Deny",
-      "Action": ["*"],
-      "Resource": ["*"],
+      "Action": "*",
+      "Resource": "*",
       "Condition": {
         "ArnLike": {
           "aws:PrincipalArn": "arn:aws:iam::*:root"
