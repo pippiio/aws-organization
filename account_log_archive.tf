@@ -1,8 +1,12 @@
+locals {
+  log_archive_account_id = aws_organizations_account.this["security/Log archive"].id
+}
+
 data "aws_iam_policy_document" "log_archive_user" {
   statement {
     sid       = "AllowAssumeRole"
     actions   = ["sts:AssumeRole"]
-    resources = [format("arn:aws:iam::%s:role/%s", aws_organizations_account.this["security/Log archive"].id, local.organization_role_name)]
+    resources = [format(local.organization_role_arn_template, local.log_archive_account_id)]
 
     # condition {
     #   test     = "DateLessThan"
@@ -35,7 +39,7 @@ provider "aws" {
   access_key = aws_iam_access_key.log_archive_user.id
   secret_key = aws_iam_access_key.log_archive_user.secret
   assume_role {
-    role_arn     = format("arn:aws:iam::%s:role/%s", aws_organizations_account.this["security/Log archive"].id, local.organization_role_name)
+    role_arn     = format(local.organization_role_arn_template, local.log_archive_account_id)
     session_name = "terraform-${terraform.workspace}"
   }
 }

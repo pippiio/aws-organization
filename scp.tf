@@ -11,10 +11,8 @@ resource "aws_organizations_policy" "corporate" {
 }
 
 resource "aws_organizations_policy_attachment" "corporate" {
-  for_each = local.units
-
   policy_id = aws_organizations_policy.corporate.id
-  target_id = each.value
+  target_id = one(aws_organizations_organization.this.roots).id
 }
 
 resource "aws_organizations_policy" "network" {

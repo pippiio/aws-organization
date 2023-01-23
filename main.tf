@@ -1,7 +1,8 @@
 locals {
-  organization_role_name = "OrganizationAccountAccessRole"
-  super_admin_role       = "OrgAdministrator"
-  enabled_regions        = coalescelist(tolist(var.config.enabled_regions), [local.region_name])
+  organization_role_name         = "OrganizationAccountAccessRole"
+  organization_role_arn_template = "arn:aws:iam::%s:role/${local.organization_role_name}"
+  super_admin_role               = "Administrator"
+  enabled_regions                = coalescelist(tolist(var.config.enabled_regions), [local.region_name])
 
   unit_tree = { for name, unit in merge(var.config.units, {
     suspended = try(var.config.units["suspended"], {
