@@ -6,21 +6,31 @@
       "Effect": "Deny",
       "NotAction": [
         "cloudfront:*",
+				"cloudtrail:*",
         "ec2:*",
-        "fms:*:",
+        "fms:*",
+        "health:*",
         "iam:*",
+        "kms:*",
         "network-firewall:*",
         "organizations:*",
+        "pricing:*",
         "route53:*",
         "route53resolver:*",
         "route53domains:*",
         "shield:*",
+        "sts:*",
+        "support:*",
+        "trustedadvisor:*",
         "vpc:*",
         "waf:*",
         "waf-regional:*",
-        "wafv2:*"
+        "wafv2:*",
+        "wellarchitected:*"
       ],
-      "Resource": "*"
+      "Resource": [
+        "*"
+      ]
     },
     {
       "Sid": "DenyRemovingDomainsAndHostedzone",
@@ -33,7 +43,9 @@
         "route53domains:UpdateDomainContact*",
         "route53domains:RetrieveDomainAuthCode"
       ],
-      "Resource": "*",
+      "Resource": [
+        "*"
+      ],
       "Condition": {
         "ArnNotLike": {
           "aws:PrincipalARN": [

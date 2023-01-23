@@ -17,6 +17,19 @@ resource "aws_organizations_policy_attachment" "corporate" {
   target_id = each.value
 }
 
+resource "aws_organizations_policy" "network" {
+  name        = "Network"
+  type        = "SERVICE_CONTROL_POLICY"
+  description = "Enables network related services only for Network account."
+  content     = replace(file("${path.module}/policies/scp/network.json"), "/\\s+/", " ")
+  tags        = local.default_tags
+}
+
+resource "aws_organizations_policy_attachment" "network" {
+  policy_id = aws_organizations_policy.network.id
+  target_id = aws_organizations_account.this["infrastructure/Network"].id
+}
+
 resource "aws_organizations_policy" "suspended" {
   name        = "Suspended"
   description = "Denies everything."
@@ -95,6 +108,7 @@ locals {
   scp_policies = merge(
     { for name, policy in aws_organizations_policy.this : name => policy.id },
     {
+      network   = aws_organizations_policy.network.id
       suspended = aws_organizations_policy.suspended.id
       security  = aws_organizations_policy.security.id
     }

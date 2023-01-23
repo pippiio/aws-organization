@@ -4,7 +4,7 @@ locals {
   sso_users  = local.enable_sso == 1 ? var.config.sso.users : {}
   permission_sets = local.enable_sso == 1 ? merge({
     administrator   = one(aws_ssoadmin_permission_set.administrator).arn
-    contributer     = one(aws_ssoadmin_permission_set.contributer).arn
+    contributor     = one(aws_ssoadmin_permission_set.contributor).arn
     read_only       = one(aws_ssoadmin_permission_set.read_only).arn
     release_manager = one(aws_ssoadmin_permission_set.release_manager).arn
   }) : {}
@@ -112,22 +112,22 @@ resource "aws_ssoadmin_permission_set_inline_policy" "release_manager" {
   permission_set_arn = one(aws_ssoadmin_permission_set.release_manager).arn
 }
 
-resource "aws_ssoadmin_permission_set" "contributer" {
+resource "aws_ssoadmin_permission_set" "contributor" {
   count = local.enable_sso
 
-  name             = "Contributer"
+  name             = "Contributor"
   description      = "Provides power user access to AWS services and resources (only limited by scp)."
   instance_arn     = one(one(data.aws_ssoadmin_instances.this).arns)
   relay_state      = "https://${local.region_name}.console.aws.amazon.com/console/"
   session_duration = "PT8H"
 }
 
-resource "aws_ssoadmin_managed_policy_attachment" "contributer" {
+resource "aws_ssoadmin_managed_policy_attachment" "contributor" {
   count = local.enable_sso
 
   managed_policy_arn = "arn:aws:iam::aws:policy/PowerUserAccess"
   instance_arn       = one(one(data.aws_ssoadmin_instances.this).arns)
-  permission_set_arn = one(aws_ssoadmin_permission_set.contributer).arn
+  permission_set_arn = one(aws_ssoadmin_permission_set.contributor).arn
 }
 
 resource "aws_ssoadmin_permission_set" "read_only" {
@@ -162,7 +162,7 @@ resource "aws_ssoadmin_account_assignment" "this" {
   instance_arn       = one(one(data.aws_ssoadmin_instances.this).arns)
   permission_set_arn = local.permission_sets[each.value.permission]
   principal_id       = aws_identitystore_group.this[each.value.group].group_id
-  principal_type     = "GROUP"
   target_id          = aws_organizations_account.this[each.value.account].id
+  principal_type     = "GROUP"
   target_type        = "AWS_ACCOUNT"
 }

@@ -53,7 +53,7 @@ locals {
         "Network" = {
           email           = try(var.config.units["infrastructure"].accounts["Network"].email, format(local.email_template, "network"))
           tags            = local.default_tags
-          scp             = []
+          scp             = ["network"]
           sso             = {}
           create_iam_user = false
         }
