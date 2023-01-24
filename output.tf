@@ -20,14 +20,11 @@ output "organization_role_name" {
 
 output "accounts" {
   value = [for key, account in aws_organizations_account.this : {
-    name                   = account.name
-    email                  = account.email
-    id                     = account.id
-    ou                     = replace(key, "/${account.name}$/", "")
-    permissions            = local.accounts[key].sso
-    access_key             = try(aws_iam_access_key.iam_service_user[key].id, null)
-    secret_key             = try(aws_iam_access_key.iam_service_user[key].secret, null)
-    organization_role_name = "arn:aws:iam::${account.id}:role/${local.organization_role_name}"
+    name        = account.name
+    email       = account.email
+    id          = account.id
+    ou          = replace(key, "/${account.name}$/", "")
+    permissions = local.accounts[key].sso
   }]
 }
 
