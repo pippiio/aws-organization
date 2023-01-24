@@ -1,15 +1,21 @@
-resource "aws_organizations_organizational_unit" "units" {
-  for_each = toset(local.config.units)
+resource "aws_organizations_organization" "this" {
+  feature_set = "ALL"
+  enabled_policy_types = [
+    "BACKUP_POLICY",
+    "SERVICE_CONTROL_POLICY",
+    "TAG_POLICY"
+  ]
 
-  name      = each.value
-  parent_id = data.aws_organizations_organization.organization.roots[0].id
+  aws_service_access_principals = compact([
+    "cloudtrail.amazonaws.com",
+    try(var.config.backup.disabled, false) ? null : "backup.amazonaws.com",
+    try(var.config.sso.disabled, false) ? null : "sso.amazonaws.com",
+  ])
+
 }
 
-resource "aws_organizations_account" "accounts" {
-  for_each = local.config.accounts
-
-  name      = each.key
-  email     = each.value.email
-  role_name = local.root_role_name
-  parent_id = each.value.unit != null ? aws_organizations_organizational_unit.units[each.value.unit].id : null
+data "aws_organizations_organization" "this" {
+  depends_on = [
+    aws_organizations_account.this,
+  ]
 }

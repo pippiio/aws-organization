@@ -1,0 +1,35 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Deny",
+      "NotAction": [
+        "backup:*",
+        "budgets:*",
+        "cloudtrail:*",
+        "config:*",
+        "guardduty:*",
+        "health:*",
+        "iam:*",
+        "kms:*",
+        "organizations:*",
+        "pricing:*",
+        "shield:*",
+        "sts:*",
+        "support:*",
+        "trustedadvisor:*",
+        "wellarchitected:*",
+        ${approved_services}
+      ],
+      "Resource": "*",
+      "Condition": {
+        "ArnNotLike": {
+          "aws:PrincipalARN": [
+            "arn:aws:iam::*:role/${organization_role_name}",
+            "arn:aws:iam::*:role/${super_admin_role}"
+          ]
+        }
+      }
+    }
+  ]
+}
