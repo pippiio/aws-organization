@@ -5,14 +5,6 @@ locals {
   enabled_regions                = coalescelist(tolist(var.config.enabled_regions), [local.region_name])
 
   unit_tree = { for name, unit in merge(var.config.units, {
-    suspended = try(var.config.units["suspended"], {
-      children          = {}
-      sso               = {}
-      scp               = ["suspended"]
-      approved_services = []
-      accounts          = {}
-    })
-
     security = merge(try(var.config.units["security"], {}), {
       children = try(var.config.units["security"].children, {})
       sso      = try(var.config.units["security"].sso, {})
@@ -59,6 +51,38 @@ locals {
           create_iam_user = false
         }
       })
+    })
+
+    "policy staging" = merge(try(var.config.units["policy staging"], {}), {
+      children          = try(var.config.units["policy staging"].children, {})
+      sso               = try(var.config.units["policy staging"].sso, {})
+      scp               = setunion(try(var.config.units["policy staging"].scp, []), [])
+      approved_services = []
+      accounts = merge(try(var.config.units["policy staging"].accounts, {}), {
+        "Policy Stage" = {
+          email           = try(var.config.units["policy staging"].accounts["Policy Stage"].email, format(local.email_template, "policy"))
+          tags            = local.default_tags
+          scp             = []
+          sso             = {}
+          create_iam_user = false
+        }
+      })
+    })
+
+    exceptions = try(var.config.units["exceptions"], {
+      children          = {}
+      sso               = {}
+      scp               = []
+      approved_services = []
+      accounts          = {}
+    })
+
+    suspended = try(var.config.units["suspended"], {
+      children          = {}
+      sso               = {}
+      scp               = ["suspended"]
+      approved_services = []
+      accounts          = {}
     })
   }) : name => unit }
 

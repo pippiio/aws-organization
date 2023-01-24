@@ -7,12 +7,6 @@ data "aws_iam_policy_document" "log_archive_user" {
     sid       = "AllowAssumeRole"
     actions   = ["sts:AssumeRole"]
     resources = [format(local.organization_role_arn_template, local.log_archive_account_id)]
-
-    # condition {
-    #   test     = "DateLessThan"
-    #   variable = "aws:CurrentTime"
-    #   values   = [timeadd(timestamp(), "30m")]
-    # }
   }
 }
 
@@ -49,7 +43,11 @@ provider "aws" {
 resource "aws_s3_bucket" "cloudtrail" {
   provider = aws.cloudtrail
 
-  bucket = format("${local.name_prefix}cloudtrail-%s-${local.region_name}", aws_organizations_account.this["security/Log archive"].id)
+  bucket = format("%scloudtrail-%s-%s",
+    local.name_prefix,
+    aws_organizations_account.this["security/Log archive"].id,
+    local.region_name
+  )
 
   lifecycle {
     prevent_destroy = true

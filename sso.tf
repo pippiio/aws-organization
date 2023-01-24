@@ -3,10 +3,9 @@ locals {
   sso_groups = local.enable_sso == 1 ? var.config.sso.groups : {}
   sso_users  = local.enable_sso == 1 ? var.config.sso.users : {}
   permission_sets = local.enable_sso == 1 ? merge({
-    administrator   = one(aws_ssoadmin_permission_set.administrator).arn
-    contributor     = one(aws_ssoadmin_permission_set.contributor).arn
-    read_only       = one(aws_ssoadmin_permission_set.read_only).arn
-    release_manager = one(aws_ssoadmin_permission_set.release_manager).arn
+    administrator = one(aws_ssoadmin_permission_set.administrator).arn
+    contributor   = one(aws_ssoadmin_permission_set.contributor).arn
+    read_only     = one(aws_ssoadmin_permission_set.read_only).arn
   }) : {}
 }
 
@@ -70,48 +69,6 @@ resource "aws_ssoadmin_managed_policy_attachment" "administrator" {
   permission_set_arn = one(aws_ssoadmin_permission_set.administrator).arn
 }
 
-resource "aws_ssoadmin_permission_set" "release_manager" {
-  count = local.enable_sso
-
-  name             = "ReleaseManager"
-  description      = "Provides limited write access to AWS services and resources commonly used by release managers (only limited by scp)."
-  instance_arn     = one(one(data.aws_ssoadmin_instances.this).arns)
-  relay_state      = "https://${local.region_name}.console.aws.amazon.com/console/"
-  session_duration = "PT2H"
-}
-
-resource "aws_ssoadmin_managed_policy_attachment" "release_manager" {
-  count = local.enable_sso
-
-  managed_policy_arn = "arn:aws:iam::aws:policy/ReadOnlyAccess"
-  instance_arn       = one(one(data.aws_ssoadmin_instances.this).arns)
-  permission_set_arn = one(aws_ssoadmin_permission_set.release_manager).arn
-}
-
-data "aws_iam_policy_document" "release_manager" {
-  statement {
-    resources = ["*"]
-    actions = [
-      "s3:AbortMultipartUpload",
-      "s3:DeleteObject",
-      "s3:PutObject",
-      "autoscaling:CancelInstanceRefresh",
-      "autoscaling:DetachInstances",
-      "autoscaling:SetDesiredCapacity",
-      "autoscaling:AttachInstances",
-      "cloudfront:CreateInvalidation"
-    ]
-  }
-}
-
-resource "aws_ssoadmin_permission_set_inline_policy" "release_manager" {
-  count = local.enable_sso
-
-  inline_policy      = data.aws_iam_policy_document.release_manager.json
-  instance_arn       = one(one(data.aws_ssoadmin_instances.this).arns)
-  permission_set_arn = one(aws_ssoadmin_permission_set.release_manager).arn
-}
-
 resource "aws_ssoadmin_permission_set" "contributor" {
   count = local.enable_sso
 
@@ -119,13 +76,56 @@ resource "aws_ssoadmin_permission_set" "contributor" {
   description      = "Provides power user access to AWS services and resources (only limited by scp)."
   instance_arn     = one(one(data.aws_ssoadmin_instances.this).arns)
   relay_state      = "https://${local.region_name}.console.aws.amazon.com/console/"
-  session_duration = "PT8H"
+  session_duration = "PT10H"
 }
 
 resource "aws_ssoadmin_managed_policy_attachment" "contributor" {
   count = local.enable_sso
 
   managed_policy_arn = "arn:aws:iam::aws:policy/PowerUserAccess"
+  instance_arn       = one(one(data.aws_ssoadmin_instances.this).arns)
+  permission_set_arn = one(aws_ssoadmin_permission_set.contributor).arn
+}
+
+data "aws_iam_policy_document" "contributor" {
+  statement {
+    sid       = "AllowRoleIamActions"
+    resources = ["*"]
+    actions = [
+      "iam:AddRoleToInstanceProfile",
+      "iam:AttachRolePolicy",
+      "iam:CreateRole",
+      "iam:CreateServiceLinkedRole",
+      "iam:DeleteRole",
+      "iam:DeleteRolePermissionsBoundary",
+      "iam:DeleteRolePolicy",
+      "iam:DeleteServiceLinkedRole",
+      "iam:DetachRolePolicy",
+      "iam:GetRole",
+      "iam:GetRolePolicy",
+      "iam:GetServiceLinkedRoleDeletionStatus",
+      "iam:ListAttachedRolePolicies",
+      "iam:ListInstanceProfilesForRole",
+      "iam:ListRolePolicies",
+      "iam:ListRoleTags",
+      "iam:ListRoles",
+      "iam:PassRole",
+      "iam:PutRolePermissionsBoundary",
+      "iam:PutRolePolicy",
+      "iam:RemoveRoleFromInstanceProfile",
+      "iam:TagRole",
+      "iam:UntagRole",
+      "iam:UpdateAssumeRolePolicy",
+      "iam:UpdateRole",
+      "iam:UpdateRoleDescription",
+    ]
+  }
+}
+
+resource "aws_ssoadmin_permission_set_inline_policy" "contributor" {
+  count = local.enable_sso
+
+  inline_policy      = data.aws_iam_policy_document.contributor.json
   instance_arn       = one(one(data.aws_ssoadmin_instances.this).arns)
   permission_set_arn = one(aws_ssoadmin_permission_set.contributor).arn
 }
@@ -164,5 +164,22 @@ resource "aws_ssoadmin_account_assignment" "this" {
   principal_id       = aws_identitystore_group.this[each.value.group].group_id
   target_id          = aws_organizations_account.this[each.value.account].id
   principal_type     = "GROUP"
+  target_type        = "AWS_ACCOUNT"
+}
+
+resource "aws_ssoadmin_account_assignment" "management" {
+  for_each = { for entry in flatten([
+    for name, user in local.sso_users : [
+      for permission in user.management_account_permissions : {
+        user       = name
+        permission = permission
+      }
+  ]]) : "${entry.user}/${entry.permission}" => entry }
+
+  instance_arn       = one(one(data.aws_ssoadmin_instances.this).arns)
+  permission_set_arn = local.permission_sets[each.value.permission]
+  principal_id       = aws_identitystore_user.this[each.value.user].user_id
+  target_id          = data.aws_organizations_organization.this.master_account_id
+  principal_type     = "USER"
   target_type        = "AWS_ACCOUNT"
 }

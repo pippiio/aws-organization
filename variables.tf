@@ -54,9 +54,10 @@ variable "config" {
       }))
 
       users = optional(map(object({
-        full_name = string
-        email     = string
-        groups    = set(string)
+        full_name                      = string
+        email                          = string
+        groups                         = set(string)
+        management_account_permissions = optional(set(string), [])
       })), {})
     }))
 

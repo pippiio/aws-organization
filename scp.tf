@@ -11,8 +11,10 @@ resource "aws_organizations_policy" "corporate" {
 }
 
 resource "aws_organizations_policy_attachment" "corporate" {
+  for_each = { for key, unit in aws_organizations_organizational_unit.parent : key => unit if !contains(["policy staging", "exceptions"], key) }
+
   policy_id = aws_organizations_policy.corporate.id
-  target_id = one(aws_organizations_organization.this.roots).id
+  target_id = each.value.id
 }
 
 resource "aws_organizations_policy" "network" {
