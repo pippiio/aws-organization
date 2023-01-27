@@ -5,8 +5,9 @@
       "Sid": "DenyNonNetworkRelatedActions",
       "Effect": "Deny",
       "NotAction": [
+        "acm:*",
         "cloudfront:*",
-				"cloudtrail:*",
+        "cloudtrail:*",
         "ec2:*",
         "fms:*",
         "health:*",
