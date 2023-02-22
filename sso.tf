@@ -4,6 +4,7 @@ locals {
   sso_users  = local.enable_sso == 1 ? var.config.sso.users : {}
   permission_sets = local.enable_sso == 1 ? merge({
     administrator = one(aws_ssoadmin_permission_set.administrator).arn
+    billing       = one(aws_ssoadmin_permission_set.billing).arn
     contributor   = one(aws_ssoadmin_permission_set.contributor).arn
     read_only     = one(aws_ssoadmin_permission_set.read_only).arn
   }) : {}
