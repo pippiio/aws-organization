@@ -50,14 +50,14 @@ variable "config" {
 
     sso = optional(object({
       groups = map(object({
-        description = string
+        description                    = string
+        management_account_permissions = optional(set(string), [])
       }))
 
       users = optional(map(object({
-        full_name                      = string
-        email                          = string
-        groups                         = set(string)
-        management_account_permissions = optional(set(string), [])
+        full_name = string
+        email     = string
+        groups    = set(string)
       })), {})
     }))
 
