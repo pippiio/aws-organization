@@ -188,17 +188,17 @@ resource "aws_ssoadmin_account_assignment" "this" {
 
 resource "aws_ssoadmin_account_assignment" "management" {
   for_each = { for entry in flatten([
-    for name, user in local.sso_users : [
-      for permission in user.management_account_permissions : {
-        user       = name
+    for name, group in local.sso_groups : [
+      for permission in group.management_account_permissions : {
+        group      = name
         permission = permission
       }
-  ]]) : "${entry.user}/${entry.permission}" => entry }
+  ]]) : "${entry.group}/${entry.permission}" => entry }
 
   instance_arn       = one(one(data.aws_ssoadmin_instances.this).arns)
   permission_set_arn = local.permission_sets[each.value.permission]
-  principal_id       = aws_identitystore_user.this[each.value.user].user_id
+  principal_id       = aws_identitystore_group.this[each.value.group].group_id
   target_id          = data.aws_organizations_organization.this.master_account_id
-  principal_type     = "USER"
+  principal_type     = "GROUP"
   target_type        = "AWS_ACCOUNT"
 }
