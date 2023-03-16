@@ -88,24 +88,6 @@ resource "aws_ssoadmin_managed_policy_attachment" "contributor" {
   permission_set_arn = one(aws_ssoadmin_permission_set.contributor).arn
 }
 
-resource "aws_ssoadmin_permission_set" "billing" {
-  count = local.enable_sso
-
-  name             = "Billing"
-  description      = "Grants permissions for billing and cost management. This includes viewing account usage and viewing and modifying budgets and payment methods."
-  instance_arn     = one(one(data.aws_ssoadmin_instances.this).arns)
-  relay_state      = "https://${local.region_name}.console.aws.amazon.com/console/"
-  session_duration = "PT1H"
-}
-
-resource "aws_ssoadmin_managed_policy_attachment" "billing" {
-  count = local.enable_sso
-
-  managed_policy_arn = "arn:aws:iam::aws:policy/job-function/Billing"
-  instance_arn       = one(one(data.aws_ssoadmin_instances.this).arns)
-  permission_set_arn = one(aws_ssoadmin_permission_set.billing).arn
-}
-
 data "aws_iam_policy_document" "contributor" {
   statement {
     sid       = "AllowRoleIamActions"
@@ -113,6 +95,8 @@ data "aws_iam_policy_document" "contributor" {
     actions = [
       "iam:AddRoleToInstanceProfile",
       "iam:AttachRolePolicy",
+      "iam:CreatePolicy",
+      "iam:CreatePolicyVersion",
       "iam:CreateRole",
       "iam:CreateServiceLinkedRole",
       "iam:DeleteRole",
@@ -147,6 +131,24 @@ resource "aws_ssoadmin_permission_set_inline_policy" "contributor" {
   inline_policy      = data.aws_iam_policy_document.contributor.json
   instance_arn       = one(one(data.aws_ssoadmin_instances.this).arns)
   permission_set_arn = one(aws_ssoadmin_permission_set.contributor).arn
+}
+
+resource "aws_ssoadmin_permission_set" "billing" {
+  count = local.enable_sso
+
+  name             = "Billing"
+  description      = "Grants permissions for billing and cost management. This includes viewing account usage and viewing and modifying budgets and payment methods."
+  instance_arn     = one(one(data.aws_ssoadmin_instances.this).arns)
+  relay_state      = "https://${local.region_name}.console.aws.amazon.com/console/"
+  session_duration = "PT1H"
+}
+
+resource "aws_ssoadmin_managed_policy_attachment" "billing" {
+  count = local.enable_sso
+
+  managed_policy_arn = "arn:aws:iam::aws:policy/job-function/Billing"
+  instance_arn       = one(one(data.aws_ssoadmin_instances.this).arns)
+  permission_set_arn = one(aws_ssoadmin_permission_set.billing).arn
 }
 
 resource "aws_ssoadmin_permission_set" "read_only" {
