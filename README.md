@@ -1,145 +1,94 @@
 # pippiio aws-organization
-Terraform module for deploying AWS Organization resources
 
-## Usage
+The _aws-organization_ is a generic [Terraform](https://www.terraform.io/) module within the [pippi.io](https://pippi.io) family, maintained by [Tech Chapter](https://techchapter.com/). The pippi.io modules are build to support common use cases often seen at Tech Chapters clients. They are created with best practices in mind and battle tested at scale. All modules are free and open-source under the Mozilla Public License Version 2.0.
+
+The aws-organization module is made to provision and manage an [AWS Organization](https://aws.amazon.com/organizations/) in common scenarious often seen at Tech Chapters clients. This includes, creating sub accounts, [Service Control Policies](https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_scps.html), [SSO (Identity Center)](https://aws.amazon.com/iam/identity-center/) and more.
+
+### Example usage:
 ```hcl
-module "organization" {
-  source = "github.com/pippiio/aws-organization.git"
+module "aws_organization" {
+  source = "github.com/pippiio/aws-organization?ref=v2.0.1"
 
   config = {
-    cloudtrail_180days_deep_archive = true
+    enabled_regions = [
+      "eu-west-1",
+    ]
 
-    units = ["ops", "config"]
+    break_glass_accounts = ["administrator@example.com"]
 
-    accounts = {
-      stage = {
-        email = "admin+stage@pippi.io"
-        unit  = "ops"
-      },
-      prod = {
-        email = "admin+prod@pippi.io"
-        unit  = "ops"
-      },
-      config = {
-        email = "admin+config@pippi.io"
-        unit  = "config"
+    units = {
+      security = {
+        sso = {
+          DevSecOps = ["contributer"]
+        }
+        accounts = {
+          "Log archive"      = { email = "log-archive@example.com" }
+          "Security tooling" = { email = "security_tooling@example.com" }
+        }
       }
-    },
 
-    permission_sets = {
-      AdministratorAccess = {
-        description        = "Allow Full Access to the account",
-        policy_attachments = [data.aws_iam_policy.AdministratorAccess.arn]
-      },
-      ViewOnlyAccess = {
-        description        = "Allow ViewOnly Access to the account",
-        policy_attachments = [data.aws_iam_policy.ViewOnlyAccess.arn]
-      },
-      Billing = {
-        description        = "Allow Billing Access to the account",
-        policy_attachments = [data.aws_iam_policy.Billing.arn]
-      },
-      Contributer = {
-        description        = "Allow Contributer Access to the account",
-        inline_policy      = data.aws_iam_policy_document.contributer.json
-        policy_attachments = [data.aws_iam_policy.PowerUserAccess.arn]
+      infrastructure = {
+        sso = {
+          DevOps    = ["read_only"]
+          DevSecOps = ["contributer"]
+        }
+        accounts = {
+          Backup = { email = "backup@example.com" }
+          Network = {
+            email = "network@example.com"
+            sso = {
+              DevOps = ["contributer"]
+            }
+          }
+        }
+      }
+
+      workloads = {
+        sso = {
+          DevOps = ["read_only"]
+        }
+        children = {
+          "Non Production" = {
+            sso = {
+              Developers = ["contributor"]
+            }
+            accounts = {
+              "dev" = {
+                create_iam_user = true
+                email           = "development@example.com"
+              }
+              "stg" = {
+                email           = "staging@example.com"
+                create_iam_user = true
+              }
+            }
+          }
+          Production = {
+            accounts = {
+              "prod" = { email = "jr@example.com" }
+            }
+          }
+        }
       }
     }
 
-    account_assignments = [
-      # === AdministratorAccess to Administrator for all accounts === #
-      {
-        account_id     = local.master_account_id
-        permission_set = "AdministratorAccess",
-        principal_type = "GROUP",
-        principal_name = "Administrators"
-      },
-      {
-        account        = "stage",
-        permission_set = "AdministratorAccess",
-        principal_type = "GROUP",
-        principal_name = "Administrators"
-      },
-      {
-        account        = "prod",
-        permission_set = "AdministratorAccess",
-        principal_type = "GROUP",
-        principal_name = "Administrators"
-      },
-      {
-        account        = "config",
-        permission_set = "AdministratorAccess",
-        principal_type = "GROUP",
-        principal_name = "Administrators"
-      },
-
-
-      # === Billing to Billing for all accounts === #
-      {
-        account_id     = local.master_account_id
-        permission_set = "Billing",
-        principal_type = "GROUP",
-        principal_name = "Billing"
-      },
-      {
-        account        = "stage",
-        permission_set = "Billing",
-        principal_type = "GROUP",
-        principal_name = "Billing"
-      },
-      {
-        account        = "prod",
-        permission_set = "Billing",
-        principal_type = "GROUP",
-        principal_name = "Billing"
-      },
-      {
-        account        = "config",
-        permission_set = "Billing",
-        principal_type = "GROUP",
-        principal_name = "Billing"
-      },
-
-      # === Contributer to Developer for stage ops accounts === #
-      {
-        account        = "stage",
-        permission_set = "Contributer",
-        principal_type = "GROUP",
-        principal_name = "Developer"
-      },
-
-      # === ViewOnlyAccess to Developer for all ops accounts === #
-      {
-        account        = "stage",
-        permission_set = "ViewOnlyAccess",
-        principal_type = "GROUP",
-        principal_name = "Developer"
-      },
-      {
-        account        = "prod",
-        permission_set = "ViewOnlyAccess",
-        principal_type = "GROUP",
-        principal_name = "Developer"
+    sso = {
+      groups = {
+        "Developers" = { description = "Development team" }
+        "DevOps"     = { description = "DevOps team" }
+        "DevSecOps"  = { description = "DevSecOps team" }
+        "Finance"    = { description = "Finance team" }
       }
-    ]
+
+      users = {
+        "jd" = {
+          full_name                      = "John Doe"
+          email                          = "john.doe@example.com"
+          groups                         = ["DevOps"]
+          management_account_permissions = ["billing"]
+        }
+      }
+    }
   }
 }
 ```
-
-## Requirements
-|Name     |Version |
-|---------|--------|
-|terraform|>= 1.2.0|
-|aws      |~> 4.0  |
-
-
-## Variables
-### config:
-|Name                           |Type            |Default|Required|Description|
-|-------------------------------|----------------|-------|--------|-----------|
-|cloudtrail_180days_deep_archive|bool            |true   |no      |Deep Archive or delete cloudtrail logs after 180 days|
-|units                          |list(string)    |nil    |no      |Organization root units|
-|accounts                       |map(object({})) |nil    |no      |Organization accounts|
-|permission_sets                |map(object({})) |nil    |no      |SSO Permission Sets|
-|account_assignments            |list(object({}))|nil    |no      |SSO Account Assignments|
-|policies                       |map(object({})) |nil    |no      |Organization SCP Policies|

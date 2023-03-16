@@ -7,6 +7,7 @@
       "NotAction": [
         "acm:*",
         "cloudfront:*",
+        "cloudshell:*",
         "cloudtrail:*",
         "ec2:*",
         "fms:*",
@@ -40,7 +41,6 @@
         "route53:DeleteHostedZone",
         "route53domains:DeleteDomain",
         "route53domains:DisableDomain*",
-        "route53domains:TransferDomain*",
         "route53domains:UpdateDomainContact*",
         "route53domains:RetrieveDomainAuthCode"
       ],
