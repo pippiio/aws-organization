@@ -2,12 +2,12 @@ resource "aws_organizations_policy" "corporate" {
   name        = "Corporate"
   type        = "SERVICE_CONTROL_POLICY"
   description = "Organization wide policy that protects the organization, limits regions, denies disabling security services, creating users and public s3 buckets."
+  tags        = local.default_tags
   content = replace(templatefile("${path.module}/policies/scp/corporate.json", {
     organization_role_name = local.organization_role_name
     super_admin_role       = local.super_admin_role
     enabled_regions        = join(",", [for region in local.enabled_regions : "\"${region}\""])
   }), "/\\s+/", " ")
-  tags = local.default_tags
 }
 
 resource "aws_organizations_policy_attachment" "corporate" {
@@ -21,8 +21,11 @@ resource "aws_organizations_policy" "network" {
   name        = "Network"
   type        = "SERVICE_CONTROL_POLICY"
   description = "Enables network related services only for Network account."
-  content     = replace(file("${path.module}/policies/scp/network.json"), "/\\s+/", " ")
   tags        = local.default_tags
+  content = replace(templatefile("${path.module}/policies/scp/network.json", {
+    organization_role_name = local.organization_role_name
+    super_admin_role       = local.super_admin_role
+  }), "/\\s+/", " ")
 }
 
 resource "aws_organizations_policy_attachment" "network" {
@@ -34,15 +37,18 @@ resource "aws_organizations_policy" "suspended" {
   name        = "Suspended"
   description = "Denies everything."
   type        = "SERVICE_CONTROL_POLICY"
-  content     = replace(file("${path.module}/policies/scp/suspended.json"), "/\\s+/", " ")
   tags        = local.default_tags
+  content     = replace(file("${path.module}/policies/scp/suspended.json"), "/\\s+/", " ")
 }
 
 resource "aws_organizations_policy" "security" {
-  name    = "Security"
-  type    = "SERVICE_CONTROL_POLICY"
-  content = replace(file("${path.module}/policies/scp/security.json"), "/\\s+/", " ")
-  tags    = local.default_tags
+  name = "Security"
+  type = "SERVICE_CONTROL_POLICY"
+  tags = local.default_tags
+  content = replace(templatefile("${path.module}/policies/scp/security.json", {
+    organization_role_name = local.organization_role_name
+    super_admin_role       = local.super_admin_role
+  }), "/\\s+/", " ")
 }
 
 resource "aws_organizations_policy" "approved_only" {
