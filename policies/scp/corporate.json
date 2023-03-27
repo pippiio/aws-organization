@@ -183,8 +183,8 @@
         },
         "ArnNotLike": {
           "aws:PrincipalARN": [
-            "arn:aws:iam::*:role/Role1AllowedToBypassThisSCP",
-            "arn:aws:iam::*:role/Role2AllowedToBypassThisSCP"
+            "arn:aws:iam::*:role/${organization_role_name}",
+            "arn:aws:iam::*:role/${super_admin_role}"
           ]
         }
       }
