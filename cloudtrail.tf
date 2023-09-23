@@ -58,3 +58,12 @@ resource "aws_cloudtrail" "cloudtrail" {
     aws_s3_bucket_lifecycle_configuration.cloudtrail,
   ]
 }
+
+resource "aws_cloudtrail_event_data_store" "this" {
+  name                 = "${local.name_prefix}event-data-store"
+  multi_region_enabled = true
+  organization_enabled = true
+  retention_period     = 6 * 30
+  kms_key_id           = aws_kms_key.this.arn
+  tags                 = local.default_tags
+}
