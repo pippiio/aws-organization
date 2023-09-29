@@ -49,6 +49,14 @@ resource "aws_cloudtrail" "cloudtrail" {
   is_organization_trail         = true
   enable_log_file_validation    = true
 
+  insight_selector {
+    insight_type = "ApiCallRateInsight"
+  }
+
+  insight_selector {
+    insight_type = "ApiErrorRateInsight"
+  }
+
   depends_on = [
     aws_s3_bucket_public_access_block.cloudtrail,
     aws_s3_bucket_versioning.cloudtrail,
@@ -60,7 +68,7 @@ resource "aws_cloudtrail" "cloudtrail" {
 }
 
 resource "aws_cloudtrail_event_data_store" "this" {
-  name                 = "${local.name_prefix}event-data-store"
+  name                 = "${local.name_prefix}events"
   multi_region_enabled = true
   organization_enabled = true
   retention_period     = 6 * 30
