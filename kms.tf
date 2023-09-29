@@ -72,7 +72,10 @@ data "aws_iam_policy_document" "kms" {
   statement {
     sid       = "Allow CloudTrail to decrypt a trail"
     resources = ["*"]
-    actions   = ["kms:Decrypt"]
+    actions = [
+      "kms:GenerateDataKey",
+      "kms:Decrypt"
+    ]
 
     principals {
       type        = "Service"
