@@ -1,7 +1,24 @@
+resource "aws_organizations_policy" "organization" {
+  name        = "Organization"
+  type        = "SERVICE_CONTROL_POLICY"
+  description = "Organization wide policy that protects the organization."
+  tags        = local.default_tags
+  content = replace(templatefile("${path.module}/policies/scp/corporate.json", {
+    organization_role_name = local.organization_role_name
+    super_admin_role       = local.super_admin_role
+    enabled_regions        = join(",", [for region in local.enabled_regions : "\"${region}\""])
+  }), "/\\s+/", " ")
+}
+
+resource "aws_organizations_policy_attachment" "organization" {
+  policy_id = aws_organizations_policy.corporate.id
+  target_id = one(aws_organizations_organization.this.roots).id
+}
+
 resource "aws_organizations_policy" "corporate" {
   name        = "Corporate"
   type        = "SERVICE_CONTROL_POLICY"
-  description = "Organization wide policy that protects the organization, limits regions, denies disabling security services, creating users and public s3 buckets."
+  description = "Organization wide policy that limits regions, denies disabling security services, creating users and public s3 buckets."
   tags        = local.default_tags
   content = replace(templatefile("${path.module}/policies/scp/corporate.json", {
     organization_role_name = local.organization_role_name
