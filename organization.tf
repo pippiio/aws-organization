@@ -8,6 +8,7 @@ resource "aws_organizations_organization" "this" {
 
   aws_service_access_principals = compact([
     "cloudtrail.amazonaws.com",
+    "account.amazonaws.com",
     try(var.config.backup.disabled, false) ? null : "backup.amazonaws.com",
     try(var.config.sso.disabled, false) ? null : "sso.amazonaws.com",
   ])
