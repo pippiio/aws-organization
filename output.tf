@@ -24,7 +24,7 @@ output "accounts" {
     email       = account.email
     id          = account.id
     ou          = replace(key, "/${account.name}$/", "")
-    permissions = local.accounts[key].sso
+    permissions = local.accounts[key].group
   }]
 }
 

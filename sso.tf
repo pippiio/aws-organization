@@ -163,10 +163,10 @@ resource "aws_ssoadmin_managed_policy_attachment" "read_only" {
   permission_set_arn = one(aws_ssoadmin_permission_set.read_only).arn
 }
 
-resource "aws_ssoadmin_account_assignment" "this" {
+resource "aws_ssoadmin_account_assignment" "group" {
   for_each = { for entry in flatten([
     for name, account in local.accounts : [
-      for group, permissions in account.all_sso : [
+      for group, permissions in account.all_group : [
         for permission in permissions : {
           key        = "${name}:${group}:${permission}"
           account    = name
@@ -180,6 +180,11 @@ resource "aws_ssoadmin_account_assignment" "this" {
   target_id          = aws_organizations_account.this[each.value.account].id
   principal_type     = "GROUP"
   target_type        = "AWS_ACCOUNT"
+}
+
+moved {
+  from = aws_ssoadmin_account_assignment.this
+  to   = aws_ssoadmin_account_assignment.group
 }
 
 resource "aws_ssoadmin_account_assignment" "management" {
