@@ -187,6 +187,25 @@ moved {
   to   = aws_ssoadmin_account_assignment.group
 }
 
+resource "aws_ssoadmin_account_assignment" "user" {
+  for_each = { for entry in flatten([
+    for name, account in local.accounts : [
+      for user, permissions in account.user : [
+        for permission in permissions : {
+          key        = "${name}:${user}:${permission}"
+          account    = name
+          user       = user
+          permission = permission
+  }]]]) : entry.key => entry }
+
+  instance_arn       = data.aws_ssoadmin_instances.this[0].arns[0]
+  permission_set_arn = local.permission_sets[each.value.permission]
+  principal_id       = aws_identitystore_user.this[each.value.user].user_id
+  target_id          = aws_organizations_account.this[each.value.account].id
+  principal_type     = "USER"
+  target_type        = "AWS_ACCOUNT"
+}
+
 resource "aws_ssoadmin_account_assignment" "management" {
   for_each = { for entry in flatten([
     for name, group in local.sso_groups : [
