@@ -15,7 +15,10 @@ resource "aws_organizations_account" "this" {
   create_govcloud   = false
 
   lifecycle {
-    ignore_changes = [role_name]
+    ignore_changes = [
+      role_name,
+      email,
+    ]
   }
 }
 
