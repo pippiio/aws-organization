@@ -15,7 +15,10 @@ resource "aws_organizations_account" "this" {
   create_govcloud   = false
 
   lifecycle {
-    ignore_changes = [role_name]
+    ignore_changes = [
+      role_name,
+      email,
+    ]
   }
 }
 
@@ -37,7 +40,6 @@ resource "aws_ssm_parameter" "iam_service_user_access_key_id" {
   name        = each.key
   description = format("AWS access key id to assume %s organization admin role", each.value.account_id)
   type        = "String"
-  overwrite   = true
   value       = each.value.content
   tags        = local.default_tags
 }
@@ -52,7 +54,6 @@ resource "aws_ssm_parameter" "iam_service_user_secret_access_key" {
   description = format("AWS access key secret to assume %s organization admin role", each.value.account_id)
   type        = "SecureString"
   key_id      = aws_kms_key.this.arn
-  overwrite   = true
   value       = each.value.content
   tags        = local.default_tags
 }
@@ -66,7 +67,6 @@ resource "aws_ssm_parameter" "iam_service_user_assume_role_arn" {
   name        = each.key
   description = format("The AWS role to assume in account %s", each.value.account_id)
   type        = "String"
-  overwrite   = true
   value       = each.value.content
   tags        = local.default_tags
 }

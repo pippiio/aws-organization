@@ -7,24 +7,26 @@ variable "config" {
       tags              = optional(map(string), {})
       approved_services = optional(set(string), [])      // List of iam actions to allow
       scp               = optional(set(string), [])      // scp names
-      sso               = optional(map(set(string)), {}) // key = group, value = permission_set
+      group             = optional(map(set(string)), {}) // key = group, value = permission_set
       accounts = optional(map(object({                   // key = name
         email           = string
         tags            = optional(map(string), {})
         scp             = optional(set(string), [])      // scp names
-        sso             = optional(map(set(string)), {}) // key = group, value = permission_set
+        group           = optional(map(set(string)), {}) // key = group, value = permission_set
+        user            = optional(map(set(string)), {}) // key = user, value = permission_set
         create_iam_user = optional(bool, false)
       })), {})
 
       children = optional(map(object({ // key = name
-        tags = optional(map(string), {})
-        scp  = optional(set(string), [])      // scp names
-        sso  = optional(map(set(string)), {}) // key = group, value = permission_set
-        accounts = optional(map(object({      // key = name
+        tags  = optional(map(string), {})
+        scp   = optional(set(string), [])      // scp names
+        group = optional(map(set(string)), {}) // key = group, value = permission_set
+        accounts = optional(map(object({       // key = name
           email           = string
           tags            = optional(map(string), {})
           scp             = optional(set(string), [])      // scp names
-          sso             = optional(map(set(string)), {}) // key = group, value = permission_set
+          group           = optional(map(set(string)), {}) // key = group, value = permission_set
+          user            = optional(map(set(string)), {}) // key = user, value = permission_set
           create_iam_user = optional(bool, false)
         })), {})
       })), {})

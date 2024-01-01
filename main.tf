@@ -7,7 +7,7 @@ locals {
   unit_tree = { for name, unit in merge(var.config.units, {
     security = merge(try(var.config.units["security"], {}), {
       children = try(var.config.units["security"].children, {})
-      sso      = try(var.config.units["security"].sso, {})
+      group    = try(var.config.units["security"].group, {})
       scp = setunion(try(var.config.units["security"].scp, []), [
         "security",
       ])
@@ -17,14 +17,16 @@ locals {
           email           = try(var.config.units["security"].accounts["Log archive"].email, format(local.email_template, "log_archive"))
           tags            = local.default_tags
           scp             = []
-          sso             = {}
+          group           = {}
+          user            = {}
           create_iam_user = false
         }
         "Security tooling" = {
           email           = try(var.config.units["security"].accounts["Security tooling"].email, format(local.email_template, "security_tooling"))
           tags            = local.default_tags
           scp             = []
-          sso             = {}
+          group           = {}
+          user            = {}
           create_iam_user = false
         }
       })
@@ -32,7 +34,7 @@ locals {
 
     infrastructure = merge(try(var.config.units["infrastructure"], {}), {
       children          = try(var.config.units["infrastructure"].children, {})
-      sso               = try(var.config.units["infrastructure"].sso, {})
+      group             = try(var.config.units["infrastructure"].group, {})
       scp               = setunion(try(var.config.units["infrastructure"].scp, []), [])
       approved_services = []
       accounts = merge(try(var.config.units["infrastructure"].accounts, {}), {
@@ -40,14 +42,16 @@ locals {
           email           = try(var.config.units["infrastructure"].accounts["Backup"].email, format(local.email_template, "backup"))
           tags            = local.default_tags
           scp             = []
-          sso             = {}
+          group           = {}
+          user            = {}
           create_iam_user = false
         }
         "Network" = {
           email           = try(var.config.units["infrastructure"].accounts["Network"].email, format(local.email_template, "network"))
           tags            = local.default_tags
           scp             = ["network"]
-          sso             = {}
+          group           = {}
+          user            = {}
           create_iam_user = false
         }
       })
@@ -55,7 +59,7 @@ locals {
 
     "policy staging" = merge(try(var.config.units["policy staging"], {}), {
       children          = try(var.config.units["policy staging"].children, {})
-      sso               = try(var.config.units["policy staging"].sso, {})
+      group             = try(var.config.units["policy staging"].group, {})
       scp               = setunion(try(var.config.units["policy staging"].scp, []), [])
       approved_services = []
       accounts = merge(try(var.config.units["policy staging"].accounts, {}), {
@@ -63,7 +67,8 @@ locals {
           email           = try(var.config.units["policy staging"].accounts["Policy Stage"].email, format(local.email_template, "policy"))
           tags            = local.default_tags
           scp             = []
-          sso             = {}
+          group           = {}
+          user            = {}
           create_iam_user = false
         }
       })
@@ -71,7 +76,7 @@ locals {
 
     exceptions = try(var.config.units["exceptions"], {
       children          = {}
-      sso               = {}
+      group             = {}
       scp               = []
       approved_services = []
       accounts          = {}
@@ -79,7 +84,7 @@ locals {
 
     suspended = try(var.config.units["suspended"], {
       children          = {}
-      sso               = {}
+      group             = {}
       scp               = ["suspended"]
       approved_services = []
       accounts          = {}
@@ -91,11 +96,11 @@ locals {
     flatten([
       for parent_unit_name, parent_unit in local.unit_tree : [
         for name, account in parent_unit.accounts : merge(account, {
-          key             = "${parent_unit_name}/${name}"
-          unit_name       = parent_unit_name
-          name            = name
-          parent_unit_sso = parent_unit.sso
-          child_unit_sso  = {}
+          key               = "${parent_unit_name}/${name}"
+          unit_name         = parent_unit_name
+          name              = name
+          parent_unit_group = parent_unit.group
+          child_unit_group  = {}
         })
     ]]),
     // Child Level accounts
@@ -103,24 +108,24 @@ locals {
       for parent_unit_name, parent_unit in local.unit_tree : [
         for child_unit_name, child_unit in parent_unit.children : [
           for name, account in child_unit.accounts : merge(account, {
-            key             = "${parent_unit_name}/${child_unit_name}/${name}"
-            unit_name       = "${parent_unit_name}/${child_unit_name}"
-            name            = name
-            parent_unit_sso = parent_unit.sso
-            child_unit_sso  = child_unit.sso
+            key               = "${parent_unit_name}/${child_unit_name}/${name}"
+            unit_name         = "${parent_unit_name}/${child_unit_name}"
+            name              = name
+            parent_unit_group = parent_unit.group
+            child_unit_group  = child_unit.group
           })
     ]]])
     ) :
     // Account hiearachy w. inherited sso
     entry.key => merge(entry, {
-      all_sso = { for group in setunion(
-        keys(entry.parent_unit_sso),
-        keys(entry.child_unit_sso),
-        keys(entry.sso)
+      all_group = { for group in setunion(
+        keys(entry.parent_unit_group),
+        keys(entry.child_unit_group),
+        keys(entry.group)
         ) : group => setunion(
-        try(entry.parent_unit_sso[group], []),
-        try(entry.child_unit_sso[group], []),
-        try(entry.sso[group], []),
+        try(entry.parent_unit_group[group], []),
+        try(entry.child_unit_group[group], []),
+        try(entry.group[group], []),
       ) }
   }) }
 }
