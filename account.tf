@@ -16,8 +16,9 @@ resource "aws_organizations_account" "this" {
 
   lifecycle {
     ignore_changes = [
-      role_name,
+      name,
       email,
+      role_name,
     ]
   }
 }
