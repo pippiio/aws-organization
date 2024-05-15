@@ -108,13 +108,13 @@ data "aws_iam_policy_document" "kms" {
 }
 
 resource "aws_kms_key" "this" {
-  description         = "KMS CMK used for audit log"
+  description         = "KMS CMK used by ${var.name_prefix}organization"
   enable_key_rotation = true
   policy              = data.aws_iam_policy_document.kms.json
   tags                = local.default_tags
 }
 
 resource "aws_kms_alias" "this" {
-  name          = "alias/auditlog"
+  name          = "alias/organization"
   target_key_id = aws_kms_key.this.key_id
 }
