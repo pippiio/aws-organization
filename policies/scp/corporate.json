@@ -107,6 +107,7 @@
         "ec2:DescribeRegions",
         "ec2:DescribeTransitGateways",
         "ec2:DescribeVpnGateways",
+        "ecr-public:*",
         "fms:*",
         "globalaccelerator:*",
         "health:*",
