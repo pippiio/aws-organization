@@ -133,4 +133,12 @@ locals {
         try(entry.group[group], []),
       ) }
   }) }
+
+  custom_account_users = merge([ for key, account in local.accounts : { 
+    for username, policy in account.custom_users : "${key}-${username}" => {
+      username = username
+      policy   = policy  
+    }}
+    if account.custom_users != {}
+  ]...)
 }

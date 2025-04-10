@@ -33,13 +33,7 @@ resource "aws_iam_user" "iam_service_user" {
 }
 
 resource "aws_iam_user" "iam_custom_user" {
-  for_each = merge([ for key, account in local.accounts : { 
-    for username, policy in account.custom_users : "${key}-${username}" => {
-      username = username
-      policy   = policy  
-    }}
-    if account.custom_users != {}
-  ]...)
+  for_each = local.custom_account_users
 
   name = each.value.username
   path = "/accounts/"
@@ -48,14 +42,9 @@ resource "aws_iam_user" "iam_custom_user" {
 }
 
 resource "aws_iam_user_policy" "iam_custom_user" {
-  for_each = merge([ for key, account in local.accounts : { 
-    for username, policy in account.custom_users : "${key}-${username}" => {
-      username = username
-      policy   = policy  
-    }}
-    if account.custom_users != {}
-  ]...)
-  name   = "${each.value.username}-policy"
+  for_each = local.custom_account_users
+  
+  name   = "CustomUser-${each.value.username}"
   user   = each.value.username
   policy = each.value.policy
 }
