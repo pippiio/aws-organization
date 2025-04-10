@@ -32,6 +32,34 @@ resource "aws_iam_user" "iam_service_user" {
   tags = local.default_tags
 }
 
+resource "aws_iam_user" "iam_custom_user" {
+  for_each = merge([ for key, account in local.accounts : { 
+    for username, policy in account.custom_users : "${key}-${username}" => {
+      username = username
+      policy   = policy  
+    }}
+    if account.custom_users != {}
+  ]...)
+
+  name = each.value.username
+  path = "/accounts/"
+
+  tags = local.default_tags
+}
+
+resource "aws_iam_user_policy" "iam_custom_user" {
+  for_each = merge([ for key, account in local.accounts : { 
+    for username, policy in account.custom_users : "${key}-${username}" => {
+      username = username
+      policy   = policy  
+    }}
+    if account.custom_users != {}
+  ]...)
+  name   = "${each.value.username}-policy"
+  user   = each.value.username
+  policy = each.value.policy
+}
+
 resource "aws_ssm_parameter" "iam_service_user_access_key_id" {
   for_each = { for key, account in local.accounts : "/account/${aws_organizations_account.this[key].id}/aws_access_key_id" => {
     account_id = aws_organizations_account.this[key].id

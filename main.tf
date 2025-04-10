@@ -20,6 +20,7 @@ locals {
           group           = {}
           user            = {}
           create_iam_user = false
+          custom_users    = {}
         }
         "Security tooling" = {
           email           = try(var.config.units["security"].accounts["Security tooling"].email, format(local.email_template, "security_tooling"))
@@ -28,6 +29,7 @@ locals {
           group           = {}
           user            = {}
           create_iam_user = false
+          custom_users    = {}
         }
       })
     })
@@ -45,6 +47,7 @@ locals {
           group           = {}
           user            = {}
           create_iam_user = false
+          custom_users    = {}
         }
         "Network" = {
           email           = try(var.config.units["infrastructure"].accounts["Network"].email, format(local.email_template, "network"))
@@ -53,6 +56,7 @@ locals {
           group           = {}
           user            = {}
           create_iam_user = false
+          custom_users    = {}
         }
       })
     })
@@ -70,6 +74,7 @@ locals {
           group           = {}
           user            = {}
           create_iam_user = false
+          custom_users    = {}
         }
       })
     })

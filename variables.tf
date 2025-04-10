@@ -15,6 +15,7 @@ variable "config" {
         group           = optional(map(set(string)), {}) // key = group, value = permission_set
         user            = optional(map(set(string)), {}) // key = user, value = permission_set
         create_iam_user = optional(bool, false)
+        custom_users    = optional(map(string), {})          // key = username, value = user policy json
       })), {})
 
       children = optional(map(object({ // key = name
@@ -28,6 +29,7 @@ variable "config" {
           group           = optional(map(set(string)), {}) // key = group, value = permission_set
           user            = optional(map(set(string)), {}) // key = user, value = permission_set
           create_iam_user = optional(bool, false)
+          custom_users    = optional(map(string), {})          // key = username, value = user policy json
         })), {})
       })), {})
       })), {
