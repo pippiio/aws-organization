@@ -39,7 +39,7 @@ resource "aws_ssm_parameter" "iam_service_user_access_key_id" {
   }
 
   name        = "/account/${aws_organizations_account.this[each.key].id}/aws_access_key_id"
-  description = format("AWS access key id to assume %s organization admin role", each.value.account_id)
+  description = format("AWS access key id to assume %s organization admin role", aws_organizations_account.this[each.key].id)
   type        = "String"
   value       = aws_iam_access_key.iam_service_user[each.key].id
   tags        = local.default_tags
