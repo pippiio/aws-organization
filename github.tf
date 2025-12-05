@@ -1,6 +1,6 @@
 locals {
   provider_alias = { for k, v in local.accounts :
-    k => replace(replace(lower(k), " ", "_"), ".", "_")
+    k => replace(replace(replace(lower(k), " ", "-"), ".", "-"), "/", "-")
   }
 }
 
@@ -11,7 +11,7 @@ provider "aws" {
 
   assume_role {
     role_arn     = format(local.organization_role_arn_template, aws_organizations_account.this[each.key].id)
-    session_name = "terraform-${replace(each.key, "/", "_")}"
+    session_name = "terraform-${replace(replace(each.key, "/", "-"), " ", "-")}"
   }
 }
 
