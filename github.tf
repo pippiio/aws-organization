@@ -36,7 +36,7 @@ resource "aws_iam_role" "this" {
       Effect = "Allow"
       Action = "sts:AssumeRoleWithWebIdentity"
       Principal = {
-        Federated = aws_iam_openid_connect_provider.this.arn
+        Federated = aws_iam_openid_connect_provider.this[each.key].arn
       }
       Condition = {
         StringEquals = {
