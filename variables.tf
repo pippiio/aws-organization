@@ -15,7 +15,7 @@ variable "config" {
         group           = optional(map(set(string)), {}) // key = group, value = permission_set
         user            = optional(map(set(string)), {}) // key = user, value = permission_set
         create_iam_user = optional(bool, false)
-        github          = optional(set(string), []) // key = repo path
+        github          = optional(set(string), []) // key = repo path ("org/repo")
       })), {})
 
       children = optional(map(object({ // key = name
@@ -29,7 +29,7 @@ variable "config" {
           group           = optional(map(set(string)), {}) // key = group, value = permission_set
           user            = optional(map(set(string)), {}) // key = user, value = permission_set
           create_iam_user = optional(bool, false)
-          github          = optional(set(string), []) // key = repo path
+          github          = optional(set(string), []) // key = repo path ("org/repo")
         })), {})
       })), {})
       })), {
