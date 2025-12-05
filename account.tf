@@ -1,5 +1,5 @@
 locals {
-  master_account_email = split("@", data.aws_organizations_organization.this.master_account_email)
+  master_account_email = split("@", var.config.master_account_email)
   email_template       = "${local.master_account_email[0]}+%s@${local.master_account_email[1]}"
 }
 
