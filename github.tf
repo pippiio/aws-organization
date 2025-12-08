@@ -57,3 +57,14 @@ resource "aws_iam_role_policy_attachment" "this" {
   role       = each.value.name
   policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess"
 }
+
+
+resource "aws_ssm_parameter" "iam_oidc_assume_role_arn" {
+  for_each = aws_iam_role.this
+
+  name        = "/account/${aws_organizations_account.this[each.key].id}/aws_oidc_assume_role_arn"
+  description = format("The AWS OIDC role to assume in account %s", aws_organizations_account.this[each.key].id)
+  type        = "String"
+  value       = each.value.arn
+  tags        = local.default_tags
+}

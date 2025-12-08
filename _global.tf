@@ -8,7 +8,6 @@ data "aws_availability_zones" "available" {
   state = "available"
 }
 
-
 variable "name_prefix" {
   description = "A prefix that will be used on all named resources."
   type        = string

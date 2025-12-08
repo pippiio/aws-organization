@@ -70,7 +70,7 @@ variable "config" {
 
 
     })
-    master_account_email = string
+    master_account_email       = string
     master_account_github_repo = string
     github_oidc_thumbprints = optional(set(string),
       ["6938fd4d98bab03faadb97b34396831e3780aea1",
