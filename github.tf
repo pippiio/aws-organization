@@ -15,13 +15,6 @@ provider "aws" {
   }
 }
 
-data "external" "oidc_exists" {
-  for_each = { for key, account in local.accounts : key => account if length(account.github) > 0 }
-  provider = aws.oidc[each.key]
-
-  program = ["bash", "${path.module}/check_oidc.sh", each.key] # each.key = profile . Might not be right
-}
-
 resource "aws_iam_openid_connect_provider" "this" {
   for_each = { for key, account in local.accounts : key => account if length(account.github) > 0 }
   provider = aws.oidc[each.key]
@@ -64,4 +57,3 @@ resource "aws_iam_role_policy_attachment" "this" {
   role       = each.value.name
   policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess"
 }
-

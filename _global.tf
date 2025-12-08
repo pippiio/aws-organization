@@ -2,9 +2,12 @@ data "aws_region" "current" {}
 
 data "aws_caller_identity" "current" {}
 
+data "aws_organizations_organization" "current" {}
+
 data "aws_availability_zones" "available" {
   state = "available"
 }
+
 
 variable "name_prefix" {
   description = "A prefix that will be used on all named resources."
