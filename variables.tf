@@ -15,6 +15,7 @@ variable "config" {
         group           = optional(map(set(string)), {}) // key = group, value = permission_set
         user            = optional(map(set(string)), {}) // key = user, value = permission_set
         create_iam_user = optional(bool, false)
+        github          = optional(set(string), []) // key = repo path ("org/repo")
       })), {})
 
       children = optional(map(object({ // key = name
@@ -28,6 +29,7 @@ variable "config" {
           group           = optional(map(set(string)), {}) // key = group, value = permission_set
           user            = optional(map(set(string)), {}) // key = user, value = permission_set
           create_iam_user = optional(bool, false)
+          github          = optional(set(string), []) // key = repo path ("org/repo")
         })), {})
       })), {})
       })), {
@@ -68,7 +70,11 @@ variable "config" {
 
 
     })
-
+    master_account_email       = string
+    master_account_github_repo = string
+    github_oidc_thumbprints = optional(set(string),
+      ["6938fd4d98bab03faadb97b34396831e3780aea1",
+    "1c58a3a8518e8759bf075b76b750d4f2df264fcd"])
     # AWS Security Hub
     # Amazon GuardDuty
     # AWS Config

@@ -101,6 +101,7 @@ locals {
           name              = name
           parent_unit_group = parent_unit.group
           child_unit_group  = {}
+          github            = toset(try(account.github, []))
         })
     ]]),
     // Child Level accounts
@@ -113,6 +114,7 @@ locals {
             name              = name
             parent_unit_group = parent_unit.group
             child_unit_group  = child_unit.group
+            github            = toset(try(account.github, []))
           })
     ]]])
     ) :
