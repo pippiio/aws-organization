@@ -28,7 +28,7 @@ resource "aws_iam_role" "this" {
   for_each = { for key, account in local.accounts : key => account if length(account.github) > 0 }
   provider = aws.oidc[each.key]
 
-  name = format("GitHubActionsRole-%s", local.provider_alias[each.key])
+  name = substr(format("GitHubActionsRole-%s", local.provider_alias[each.key]), max(length(format("GitHubActionsRole-%s", local.provider_alias[each.key])) - 64, 0), 64)
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
