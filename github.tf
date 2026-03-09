@@ -1,9 +1,3 @@
-locals {
-  provider_alias = { for k, v in local.accounts :
-    k => replace(replace(replace(lower(k), " ", "-"), ".", "-"), "/", "-")
-  }
-}
-
 provider "aws" {
   for_each = { for key, account in local.accounts : key => account if length(account.github) > 0 }
   alias    = "oidc"
@@ -28,7 +22,7 @@ resource "aws_iam_role" "this" {
   for_each = { for key, account in local.accounts : key => account if length(account.github) > 0 }
   provider = aws.oidc[each.key]
 
-  name = format("GitHubActionsRole-%s", local.provider_alias[each.value.name])
+  name = "GitHubActionsRole-${replace(replace(replace(lower(each.value.name), " ", "-"), ".", "-"), "/", "-")}"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
