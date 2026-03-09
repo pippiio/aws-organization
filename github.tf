@@ -11,7 +11,7 @@ provider "aws" {
 
   assume_role {
     role_arn     = format(local.organization_role_arn_template, aws_organizations_account.this[each.key].id)
-    session_name = substr("terraform-${replace(replace(each.key, "/", "-"), " ", "-")}", max(length("terraform-${replace(replace(each.key, "/", "-"), " ", "-")}") - 64, 0), 64)
+    session_name = "terraform-${replace(replace(each.value.name, "/", "-"), " ", "-")}"
   }
 }
 
@@ -28,7 +28,7 @@ resource "aws_iam_role" "this" {
   for_each = { for key, account in local.accounts : key => account if length(account.github) > 0 }
   provider = aws.oidc[each.key]
 
-  name = substr(format("GitHubActionsRole-%s", local.provider_alias[each.key]), max(length(format("GitHubActionsRole-%s", local.provider_alias[each.key])) - 64, 0), 64)
+  name = format("GitHubActionsRole-%s", local.provider_alias[each.value.name])
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
