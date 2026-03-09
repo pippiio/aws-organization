@@ -11,7 +11,7 @@ provider "aws" {
 
   assume_role {
     role_arn     = format(local.organization_role_arn_template, aws_organizations_account.this[each.key].id)
-    session_name = "terraform-${replace(replace(each.key, "/", "-"), " ", "-")}"
+    session_name = substr("terraform-${replace(replace(each.key, "/", "-"), " ", "-")}", max(length("terraform-${replace(replace(each.key, "/", "-"), " ", "-")}") - 64, 0), 64)
   }
 }
 
