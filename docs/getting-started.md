@@ -28,7 +28,6 @@ module "aws_organization" {
     break_glass_accounts       = ["alice.admin", "bob.admin"]
     master_account_email       = "aws@example.com"
     master_account_github_repo = "example-org/aws-organization"
-    backup                     = {}
   }
 }
 ```

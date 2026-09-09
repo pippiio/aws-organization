@@ -24,7 +24,6 @@ module "aws_organization" {
 
     master_account_email       = "aws@example.com"
     master_account_github_repo = "example-org/aws-organization"
-    backup                     = {}
 
     sso = {
       groups = {

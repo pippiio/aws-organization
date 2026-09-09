@@ -36,7 +36,6 @@ module "aws_organization" {
     # typically the repository holding this Terraform configuration.
     master_account_github_repo = "example-org/aws-organization"
 
-    backup = {}
 
     units = {
       workloads = {

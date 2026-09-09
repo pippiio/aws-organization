@@ -1,6 +1,6 @@
 # Minimal configuration.
 #
-# Only the four required inputs are set. The module still provisions the full
+# Only the three required inputs are set. The module still provisions the full
 # baseline: the Security, Infrastructure, Policy Staging, Exceptions and
 # Suspended organizational units with their mandatory accounts, the default
 # Workloads unit with Production / Non Production children, an organization
@@ -27,8 +27,5 @@ module "aws_organization" {
 
     # "<org>/<repo>" allowed to assume the management account OIDC role.
     master_account_github_repo = "example-org/aws-organization"
-
-    # `backup` has no default and must be present, even when empty.
-    backup = {}
   }
 }

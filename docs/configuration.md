@@ -21,8 +21,6 @@ The module always adds `tf-module = "pippi.io/aws-organization"` and
 | `break_glass_accounts` | `set(string)` | 1-5 IAM user names created in the management account. Two to four is recommended |
 | `master_account_email` | `string` | Base address for generated member account emails. `aws@example.com` yields `aws+network@example.com` |
 | `master_account_github_repo` | `string` | `"<org>/<repo>"` trusted by the management account GitHub OIDC role |
-| `backup` | `object` | Has no default, so it must be present. `backup = {}` is enough |
-| `backup.disabled` | `bool` (default `false`) | When true, `backup.amazonaws.com` is left out of the organization's trusted service access |
 
 ## Optional
 
@@ -32,6 +30,8 @@ The module always adds `tf-module = "pippi.io/aws-organization"` and
 | `units` | `map(unit)` | Workloads with Production and Non Production | The organizational unit tree |
 | `policies.scp` | `map(policy)` | `{}` | Custom service control policies |
 | `sso` | `object` | `null` | Identity Center configuration. `null` disables all Identity Center resources |
+| `backup` | `object` | `{}` | Organization level backup settings |
+| `backup.disabled` | `bool` | `false` | When true, `backup.amazonaws.com` is left out of the organization's trusted service access |
 | `github_oidc_thumbprints` | `set(string)` | GitHub's two current thumbprints | Thumbprints for the OIDC providers |
 
 ## `units`

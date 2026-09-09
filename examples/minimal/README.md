@@ -1,13 +1,12 @@
 # Minimal
 
-The smallest configuration the module accepts. Four inputs are required:
+The smallest configuration the module accepts. Three inputs are required:
 
 | Input | Purpose |
 |---|---|
 | `break_glass_accounts` | Between 1 and 5 IAM users in the management account that retain access if Identity Center is unavailable |
 | `master_account_email` | Base address used to generate member account emails |
 | `master_account_github_repo` | Repository allowed to assume the management account OIDC role |
-| `backup` | Has no default, so it must be present even when empty (`backup = {}`) |
 
 Even at this size the module still creates the full landing zone baseline:
 
