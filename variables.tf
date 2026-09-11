@@ -65,11 +65,9 @@ variable "config" {
       })), {})
     }))
 
-    backup = object({
+    backup = optional(object({
       disabled = optional(bool, false)
-
-
-    })
+    }), {})
     master_account_email       = string
     master_account_github_repo = string
     github_oidc_thumbprints = optional(set(string),
