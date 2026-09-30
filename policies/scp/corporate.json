@@ -114,6 +114,7 @@
         "iam:*",
         "importexport:*",
         "kms:*",
+        "lambda:*",
         "mobileanalytics:*",
         "networkmanager:*",
         "organizations:*",
@@ -138,6 +139,25 @@
         "StringNotEquals": {
           "aws:RequestedRegion": [ 
             ${enabled_regions}
+          ]
+        },
+        "ArnNotLike": {
+          "aws:PrincipalARN": [
+            "arn:aws:iam::*:role/${organization_role_name}",
+            "arn:aws:iam::*:role/${super_admin_role}"
+          ]
+        }
+      }
+    },
+    {
+      "Sid": "DenyLambdaInNonEnabledRegions",
+      "Effect": "Deny",
+      "Action": "lambda:*",
+      "Resource": "*",
+      "Condition": {
+        "StringNotEquals": {
+          "aws:RequestedRegion": [
+            ${lambda_regions}
           ]
         },
         "ArnNotLike": {

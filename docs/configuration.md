@@ -27,6 +27,7 @@ The module always adds `tf-module = "pippi.io/aws-organization"` and
 | Field | Type | Default | Description |
 |---|---|---|---|
 | `enabled_regions` | `set(string)` | `[]` | Regions member accounts may use. Empty falls back to the provider's region. Validated against the AWS region name pattern |
+| `allow_lambda_edge` | `bool` | `false` | Also allow Lambda in `us-east-1`, where CloudFront requires Lambda@Edge functions to be created. Other services stay limited to `enabled_regions` |
 | `units` | `map(unit)` | Workloads with Production and Non Production | The organizational unit tree |
 | `policies.scp` | `map(policy)` | `{}` | Custom service control policies |
 | `sso` | `object` | `null` | Identity Center configuration. `null` disables all Identity Center resources |

@@ -25,6 +25,9 @@ one exception: the Network policy.
 - Any regional action outside `config.enabled_regions`. Global and billing
   services (IAM, KMS, Route 53, CloudFront, Organizations, Support, Shield,
   WAF, Cost Explorer and similar) are exempt.
+- Lambda outside `config.enabled_regions`, plus `us-east-1` when
+  `config.allow_lambda_edge` is set so CloudFront Lambda@Edge functions can be
+  created there.
 
 The first three carve out `OrganizationAccountAccessRole` and the
 `Administrator` permission set, so an administrator signing in through

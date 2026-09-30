@@ -1,6 +1,7 @@
 variable "config" {
   type = object({
     enabled_regions      = optional(set(string), [])
+    allow_lambda_edge    = optional(bool, false) // Also allow Lambda in us-east-1, where Lambda@Edge functions must be created
     break_glass_accounts = set(string)
 
     units = optional(map(object({

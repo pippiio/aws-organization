@@ -7,6 +7,7 @@ resource "aws_organizations_policy" "organization" {
     organization_role_name = local.organization_role_name
     super_admin_role       = local.super_admin_role
     enabled_regions        = join(",", [for region in local.enabled_regions : "\"${region}\""])
+    lambda_regions         = join(",", [for region in local.lambda_regions : "\"${region}\""])
   }), "/\\s+/", " ")
 }
 
@@ -24,6 +25,7 @@ resource "aws_organizations_policy" "corporate" {
     organization_role_name = local.organization_role_name
     super_admin_role       = local.super_admin_role
     enabled_regions        = join(",", [for region in local.enabled_regions : "\"${region}\""])
+    lambda_regions         = join(",", [for region in local.lambda_regions : "\"${region}\""])
   }), "/\\s+/", " ")
 }
 
